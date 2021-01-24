@@ -11,6 +11,6 @@ program
 	.arguments('<url>')
 	.action(async (url) => {
 		const pathname = await pageLoader(url, (program.output = process.cwd()));
-		console.log(pathname);
+		console.log(`Page was successfully downloaded into '${pathname}'`);
 	})
 	.parse(process.argv);
