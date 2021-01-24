@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,7 +14,7 @@ jobs:
         node-version: [14.x]
 
     steps:
-        # https://github.com/actions/checkout
+      # https://github.com/actions/checkout
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         # https://github.com/actions/setup-node
@@ -29,6 +28,7 @@ jobs:
           CI: true
       - name: Run linter
         run: |
+          make format
           make fix
       - name: Test & publish code coverage
         # https://github.com/paambaati/codeclimate-action
