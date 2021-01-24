@@ -5,7 +5,8 @@ import path, { dirname } from 'path';
 import os from 'os';
 import nock from 'nock';
 import { fileURLToPath } from 'url';
-// import cheerio from 'cheerio';
+import cheerio from 'cheerio';
+import _ from 'lodash';
 import pageLoader, { makeName } from '../src/app.js';
 
 // @ts-ignore
@@ -32,7 +33,7 @@ let data;
 
 nock.disableNetConnect();
 
-test('name must be in kebabCase', () => {
+test('transform name to kebabCase', () => {
 	expect(makeName('en.wikipedia.org', '.html')).toEqual('en-wikipedia-org.html');
 	expect(makeName('en.wikipedia.org')).toEqual('en-wikipedia-org_files');
 });
@@ -43,12 +44,6 @@ describe('download page and src', () => {
 		data = await fs.readFile(getPath(wikiFileName), 'utf-8');
 		nock(wikiUrl).get('/wiki/Main_Page').reply(200, data);
 	});
-
-	test('download page', async () => {
-		const outputPath = await pageLoader(`${wikiUrl}/wiki/Main_Page`, tempDir, () => true);
-		const loadedHtml = await fs.readFile(outputPath, 'utf-8');
-		expect(loadedHtml).toEqual(data);
-	}, 10000);
 
 	test('download images', async () => {
 		const outputPath = await pageLoader(
@@ -61,5 +56,16 @@ describe('download page and src', () => {
 		const images = await fs.readdir(pathToImagesDir);
 		// console.log('images->', images);
 		expect(images).toHaveLength(19);
+	}, 10000);
+
+	test('update src in page', async () => {
+		const fileOutputPath = await pageLoader(`${wikiUrl}/wiki/Main_Page`, tempDir, () => true);
+		const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
+		const $ = cheerio.load(loadedHtml);
+		$('img')
+			.filter(
+				(_i, el) => _.endsWith($(el).attr('src'), '.png') || _.endsWith($(el).attr('src'), '.img')
+			)
+			.each((_i, imgEl) => expect($(imgEl).attr('src').includes('/tmp/')).toBeTruthy());
 	}, 10000);
 });

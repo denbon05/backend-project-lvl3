@@ -26,23 +26,26 @@ const downloadImages = (links, pathToImagesDir) => {
 			})
 			.catch((err) => {
 				console.log('downloadImages_err=>', err);
+				throw Error(err.message);
 			})
 	);
 };
 
-const changeImagesSrc = (data, pathToImagesDir) => {
+const changeImagesSrc = (data, pathToImagesDir, host) => {
 	const $ = cheerio.load(data);
 	const linkElements = $('img').map((_i, imgEl) => {
 		const oldSrc = $(imgEl).attr('src');
 		const newSrc = path.resolve(pathToImagesDir, oldSrc.slice(oldSrc.lastIndexOf('/') + 1));
 		$(imgEl).attr('src', newSrc);
+		if (oldSrc.includes('static') || oldSrc.includes('library')) return `https://${host}${oldSrc}`;
 		return `https:${oldSrc}`;
 	});
-	return linkElements.toArray().filter((link) => {
+	const imgLinks = linkElements.toArray().filter((link) => {
 		// @ts-ignore
 		const ext = path.extname(link);
 		return ext === '.png' || ext === '.jpg';
 	});
+	return { imgLinks, updatedHTML: $.html() };
 };
 
 export default (uri, outputDir, downloadSrcFunc = downloadImages) => {
@@ -51,27 +54,15 @@ export default (uri, outputDir, downloadSrcFunc = downloadImages) => {
 		.get(uri)
 		.then(
 			({ data }) => {
-				const filename = makeName(`${url.host}${url.pathname}`, '.html');
 				const absolutePath = path.resolve(outputDir);
-				const filePath = path.join(absolutePath, filename);
-				fsPromises.writeFile(filePath, data, 'utf-8');
-				return { data, absolutePath, filePath };
-			},
-			(err) => Promise.reject(err)
-		)
-		.then(
-			({ data: beforeFormatData, absolutePath, filePath }) => {
-				const data = prettier.format(beforeFormatData, { parser: 'html' });
-				return { data, absolutePath, filePath };
-			},
-			(err) => Promise.reject(err)
-		)
-		.then(
-			({ data, absolutePath, filePath }) => {
 				const pathToImagesDir = path.join(absolutePath, makeName(`${url.host}${url.pathname}`));
-				const links = changeImagesSrc(data, pathToImagesDir);
-				// console.log('links=>', links);
-				if (links.length > 0) downloadSrcFunc(links, pathToImagesDir);
+				const { imgLinks, updatedHTML } = changeImagesSrc(data, pathToImagesDir, url.host);
+				// console.log('imgLinks=>', imgLinks);
+				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
+				const filename = makeName(`${url.host}${url.pathname}`, '.html');
+				const filePath = path.join(absolutePath, filename);
+				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
+				if (imgLinks.length > 0) downloadSrcFunc(imgLinks, pathToImagesDir);
 				return filePath;
 			},
 			(err) => Promise.reject(err)

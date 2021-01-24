@@ -8,4 +8,8 @@
 
 ### Usage
 
-[![asciicast](https://asciinema.org/a/386513.svg)](https://asciinema.org/a/386513)
+#### Download page with all png and img images
+
+<pre>page-loader https://en.wikipedia.org/</pre>
+
+[![asciicast](https://asciinema.org/a/386694.svg)](https://asciinema.org/a/386694)
