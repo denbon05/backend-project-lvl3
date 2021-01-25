@@ -7,77 +7,90 @@ import path from 'path';
 import cheerio from 'cheerio';
 import prettier from 'prettier';
 
-export const makeName = (name, extension = null) => {
+export const makeName = (fullname, extension = null) => {
+	const name = fullname.slice(fullname.indexOf('//') + 1);
 	if (extension) return [_.kebabCase(`${name}`), extension].join('');
 	return [_.kebabCase(`${name}`), 'files'].join('_');
 };
 
-const downloadImages = (links, pathToImagesDir) => {
-	fsPromises.mkdir(pathToImagesDir);
-	links.forEach((link) =>
-		axios
-			.get(link, { responseType: 'stream' })
-			.then(({ data }) => {
-				const ext = path.extname(link);
-				const imgName = makeName(link, ext);
-				const filepath = path.join(pathToImagesDir, imgName);
-				data.pipe(fs.createWriteStream(filepath));
-				return filepath;
-			})
-			.catch((err) => {
-				console.log('downloadImages_err=>', err);
-				throw Error(err.message);
-			})
-	);
+const isImage = (link) => ['.img', '.png', '.ico'].includes(path.extname(link));
+const isLocalSrc = (link) => !_.startsWith(link, '//') && path.extname(link).length === 4;
+
+const downloadSrc = (links, pathToDirSrcFiles) => {
+	fsPromises.mkdir(pathToDirSrcFiles);
+	links.forEach((link) => {
+		const filepath = path.join(pathToDirSrcFiles, makeName(link, path.extname(link)));
+		if (isImage(link)) {
+			axios
+				.get(link, { responseType: 'stream' })
+				.then(({ data }) => {
+					data.pipe(fs.createWriteStream(filepath));
+				})
+				.catch((err) => {
+					throw Error(`download_img_err=>${err.message}`);
+				});
+		} else {
+			axios
+				.get(link)
+				.then(({ data }) => {
+					fsPromises.writeFile(filepath, data, 'utf-8');
+				})
+				.catch((err) => {
+					throw Error(`download_src_err=>${err.message}`);
+				});
+		}
+	});
 };
 
-const changeImagesSrc = (data, pathToImagesDir, host) => {
+const changeLocalSrcLinks = ($, tagName, srcName, filterFunc, host, pathToDirSrcFiles) => {
+	const elements = $(tagName)
+		.filter((_i, el) => $(el).attr(srcName))
+		.filter((_i, el) => filterFunc($(el).attr(srcName)))
+		.map((_i, parsedEl) => {
+			const oldAttrValue = $(parsedEl).attr(srcName);
+			const ext = path.extname(oldAttrValue);
+			const filename = makeName(
+				`${host}/${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`,
+				ext
+			);
+			const newSrc = path.resolve(pathToDirSrcFiles, filename);
+			$(parsedEl).attr(srcName, newSrc);
+			if (_.startsWith(oldAttrValue, '//')) return `https:${oldAttrValue}`;
+			return `https://${host}${oldAttrValue}`;
+		});
+	return elements.toArray();
+};
+
+const changeSrc = (data, pathToDirSrcFiles, host) => {
 	const $ = cheerio.load(data);
-	const linkElements = $('img').map((_i, imgEl) => {
-		const oldSrc = $(imgEl).attr('src');
-		const newSrc = path.resolve(
-			pathToImagesDir,
-			oldSrc.slice(oldSrc.lastIndexOf('/') + 1)
-		);
-		$(imgEl).attr('src', newSrc);
-		if (_.startsWith('/static/', oldSrc) || _.startsWith('/library/', oldSrc))
-			return `https://${host}${oldSrc}`;
-		return `https:${oldSrc}`;
-	});
-	const imgLinks = linkElements.toArray().filter((link) => {
-		// @ts-ignore
-		const ext = path.extname(link);
-		return ext === '.png' || ext === '.jpg';
-	});
-	return { imgLinks, updatedHTML: $.html() };
+	const imgLinks = changeLocalSrcLinks($, 'img', 'src', isImage, host, pathToDirSrcFiles);
+	const scriptLinks = changeLocalSrcLinks($, 'script', 'src', isLocalSrc, host, pathToDirSrcFiles);
+	const linkLinks = changeLocalSrcLinks($, 'link', 'href', isLocalSrc, host, pathToDirSrcFiles);
+	// console.log('linkLinks=>', linkLinks);
+	return { links: [...imgLinks, ...scriptLinks, ...linkLinks], updatedHTML: $.html() };
 };
 
-export default (uri, outputDir, downloadSrcFunc = downloadImages) => {
+export default (uri, outputDir, downloadSrcFunc = downloadSrc) => {
 	const url = new URL(uri.trim());
+	const absolutePath = path.resolve(outputDir);
+	const pathToDirSrcFiles = path.join(absolutePath, makeName(`${url.host}${url.pathname}`));
 	return axios
 		.get(uri)
 		.then(
 			({ data }) => {
-				const absolutePath = path.resolve(outputDir);
-				const pathToImagesDir = path.join(
-					absolutePath,
-					makeName(`${url.host}${url.pathname}`)
-				);
-				const { imgLinks, updatedHTML } = changeImagesSrc(
-					data,
-					pathToImagesDir,
-					url.host
-				);
-				// console.log('imgLinks=>', imgLinks);
+				const { links, updatedHTML } = changeSrc(data, pathToDirSrcFiles, url.host);
 				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
 				const filename = makeName(`${url.host}${url.pathname}`, '.html');
 				const filePath = path.join(absolutePath, filename);
 				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
-				if (imgLinks.length > 0) downloadSrcFunc(imgLinks, pathToImagesDir);
-				return filePath;
+				return { filePath, links };
 			},
 			(err) => Promise.reject(err)
 		)
+		.then(({ filePath, links }) => {
+			if (links.length > 0) downloadSrcFunc(links, pathToDirSrcFiles);
+			return filePath;
+		})
 		.catch((err) => {
 			console.log('err in app.js', err);
 			return Promise.reject(err);

@@ -8,8 +8,8 @@
 
 ### Usage
 
-#### Download page with all png and img images
+#### Download a page with images and local resources
 
-<pre>page-loader https://en.wikipedia.org/</pre>
+<pre>page-loader https://en.wikipedia.org/wiki/Home_page</pre>
 
-[![asciicast](https://asciinema.org/a/386694.svg)](https://asciinema.org/a/386694)
+[![asciicast](https://asciinema.org/a/387043.svg)](https://asciinema.org/a/387043)
