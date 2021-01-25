@@ -6,7 +6,6 @@ import os from 'os';
 import nock from 'nock';
 import { fileURLToPath } from 'url';
 import cheerio from 'cheerio';
-import _ from 'lodash';
 import pageLoader, { makeName } from '../src/app.js';
 
 // @ts-ignore
@@ -15,7 +14,7 @@ const __dirname = dirname(__filename);
 
 // const hexletUrl = 'https://ru.hexlet.io';
 const wikiUrl = 'https://en.wikipedia.org';
-const wikiFileName = 'wiki-main.html';
+const wikiFileName = 'wiki-home.html';
 
 const getPath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 const mockFuncDownloadImages = (links, pathToImagesDir) => {
@@ -28,9 +27,6 @@ const mockFuncDownloadImages = (links, pathToImagesDir) => {
 	});
 };
 
-let tempDir;
-let data;
-
 nock.disableNetConnect();
 
 test('transform name to kebabCase', () => {
@@ -39,33 +35,41 @@ test('transform name to kebabCase', () => {
 });
 
 describe('download page and src', () => {
-	beforeEach(async () => {
+	let tempDir;
+	let data;
+	let fileOutputPath;
+
+	beforeAll(async () => {
 		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 		data = await fs.readFile(getPath(wikiFileName), 'utf-8');
-		nock(wikiUrl).get('/wiki/Main_Page').reply(200, data);
-	});
-
-	test('download images', async () => {
-		const outputPath = await pageLoader(
-			`${wikiUrl}/wiki/Main_Page`,
+		nock(wikiUrl).get('/wiki/Home_page').reply(200, data);
+		fileOutputPath = await pageLoader(
+			`${wikiUrl}/wiki/Home_page`,
 			tempDir,
 			mockFuncDownloadImages
 		);
-		const downloadDir = path.dirname(outputPath);
-		const pathToImagesDir = path.join(downloadDir, 'en-wikipedia-org-wiki-main-page_files');
+	});
+
+	test('download images', async () => {
+		const downloadDir = path.dirname(fileOutputPath);
+		const pathToImagesDir = path.join(
+			downloadDir,
+			'en-wikipedia-org-wiki-home-page_files'
+		);
 		const images = await fs.readdir(pathToImagesDir);
 		// console.log('images->', images);
-		expect(images).toHaveLength(19);
-	}, 10000);
+		expect(images).toHaveLength(5);
+	});
 
 	test('update src in page', async () => {
-		const fileOutputPath = await pageLoader(`${wikiUrl}/wiki/Main_Page`, tempDir, () => true);
 		const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
 		const $ = cheerio.load(loadedHtml);
 		$('img')
 			.filter(
-				(_i, el) => _.endsWith($(el).attr('src'), '.png') || _.endsWith($(el).attr('src'), '.img')
+				(_i, el) =>
+					path.extname($(el).attr('src')) === '.png' ||
+					path.extname($(el).attr('src')) === '.img'
 			)
 			.each((_i, imgEl) => expect($(imgEl).attr('src').includes('/tmp/')).toBeTruthy());
-	}, 10000);
+	});
 });

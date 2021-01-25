@@ -104,7 +104,8 @@
             (_rollbarConfig.rollbarJsUrl =
               _rollbarConfig.rollbarJsUrl ||
               'https://cdn.rollbar.com/rollbarjs/refs/tags/v2.19.3/rollbar.min.js'),
-            (_rollbarConfig.async = void 0 === _rollbarConfig.async || _rollbarConfig.async);
+            (_rollbarConfig.async =
+              void 0 === _rollbarConfig.async || _rollbarConfig.async);
           var a = n.setupShim(window, _rollbarConfig),
             l = t(_rollbarConfig);
           (window.rollbar = n.Rollbar),
@@ -253,14 +254,18 @@
                     ((l._rollbarOldOnError = r.onerror),
                     n.captureUncaughtExceptions(r, l, !0),
                     e.wrapGlobalEventHandlers && t(r, l, !0)),
-                    e.captureUnhandledRejections && n.captureUnhandledRejections(r, l, !0);
+                    e.captureUnhandledRejections &&
+                      n.captureUnhandledRejections(r, l, !0);
                   var a = e.autoInstrument;
                   return (
                     !1 !== e.enabled &&
                       (void 0 === a || !0 === a || ('object' == typeof a && a.network)) &&
                       r.addEventListener &&
                       (r.addEventListener('load', l.captureLoad.bind(l)),
-                      r.addEventListener('DOMContentLoaded', l.captureDomContentLoaded.bind(l))),
+                      r.addEventListener(
+                        'DOMContentLoaded',
+                        l.captureDomContentLoaded.bind(l)
+                      )),
                     (r[o] = l),
                     l
                   );
@@ -337,12 +342,18 @@
                 n.call(this, e, r.wrap(o), t);
               };
               (t._rollbarOldAdd = n), (t.belongsToShim = o), (e.addEventListener = t);
-              for (var a = e.removeEventListener; a._rollbarOldRemove && a.belongsToShim; )
+              for (
+                var a = e.removeEventListener;
+                a._rollbarOldRemove && a.belongsToShim;
+
+              )
                 a = a._rollbarOldRemove;
               var l = function (r, e, o) {
                 a.call(this, r, (e && e._rollbar_wrapped) || e, o);
               };
-              (l._rollbarOldRemove = a), (l.belongsToShim = o), (e.removeEventListener = l);
+              (l._rollbarOldRemove = a),
+                (l.belongsToShim = o),
+                (e.removeEventListener = l);
             }
           }
           r.exports = function (r, e, o) {
@@ -507,7 +518,11 @@
       });
     </script>
 
-    <link rel="stylesheet" media="all" href="https://cdn2.hexlet.io/packs/css/129-833bfa60.css" />
+    <link
+      rel="stylesheet"
+      media="all"
+      href="https://cdn2.hexlet.io/packs/css/129-833bfa60.css"
+    />
     <link
       rel="stylesheet"
       media="all"
@@ -546,7 +561,9 @@
     ></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-white hexlet-navbar border-bottom">
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-white hexlet-navbar border-bottom"
+    >
       <a aria-hidden="true" class="navbar-brand mr-4" href="/"> Хекслет </a>
       <button
         aria-controls="navbarResponsive"
@@ -584,7 +601,9 @@
         </ul>
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link hexlet-navbar-link px-3" href="https://ru.hexlet.io/session/new"
+            <a
+              class="nav-link hexlet-navbar-link px-3"
+              href="https://ru.hexlet.io/session/new"
               ><div class="my-2">Вход</div></a
             >
           </li>
@@ -655,7 +674,8 @@
                   <div class="form-row w-100">
                     <div class="col">
                       <div class="string optional search_query_term">
-                        <label class="sr-only string optional" for="search_query_term">Term</label
+                        <label class="sr-only string optional" for="search_query_term"
+                          >Term</label
                         ><input
                           class="form-control string optional w-100"
                           placeholder="Например, Javascript, PHP, замыкание, объекты первого рода..."
@@ -683,15 +703,18 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    JavaScript — один из самых популярных языков программирования. Его используют в
-                    веб-разработке для работы с фронтендом и бэкендом. Онлайн-курсы Хекслета — это
-                    путь от основ программирования на JavaScript до работы с популярными и
-                    востребованными инструментами, включая React, Redux, Webpack, Express.
+                    JavaScript — один из самых популярных языков программирования. Его
+                    используют в веб-разработке для работы с фронтендом и бэкендом.
+                    Онлайн-курсы Хекслета — это путь от основ программирования на
+                    JavaScript до работы с популярными и востребованными инструментами,
+                    включая React, Redux, Webpack, Express.
                   </p>
                 </div>
                 <div class="col-lg-4">
                   <div class="row no-gutters mb-3">
-                    <div class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3">
+                    <div
+                      class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3"
+                    >
                       <div class="fad fa-crown fa-2x text-warning"></div>
                     </div>
                     <div class="col">
@@ -741,7 +764,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Настройка окружения</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Настройка окружения
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Реальный опыт программирования возможен только если код запуск...
@@ -852,7 +877,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Redux (React)</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Redux (React)
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -890,7 +917,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/js-dom"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/js-dom"
                             >Посмотреть
                           </a>
                         </div>
@@ -992,7 +1021,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Введение в ООП</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Введение в ООП
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1078,7 +1109,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Обработка ошибок</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Обработка ошибок
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1106,7 +1139,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Архитектура фронтенда</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Архитектура фронтенда
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1204,7 +1239,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/js-ddd"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/js-ddd"
                             >Посмотреть
                           </a>
                         </div>
@@ -1250,7 +1287,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Погружаясь в классы</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Погружаясь в классы
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1278,7 +1317,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Основы программирования</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Основы программирования
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Знакомство с миром программирования и популярнейшим языком Jav...
@@ -1315,7 +1356,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/ddp"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/ddp"
                             >Посмотреть
                           </a>
                         </div>
@@ -1331,7 +1374,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Составные данные</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Составные данные
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1417,7 +1462,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">JS: Последовательности</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          JS: Последовательности
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1515,7 +1562,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/js-abp"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/js-abp"
                             >Посмотреть
                           </a>
                         </div>
@@ -1617,16 +1666,19 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    PHP — серверный язык программирования, применяется для разработки бэкенда. С
-                    помощью наших курсов вы познакомитесь с азами программирования на PHP, научитесь
-                    использовать объектно-ориентированное программирование (ООП) и работать с
-                    востребованными инструментами разработки, включая Lumen, Laravel, Composer, PHP
-                    Unit, Slim.
+                    PHP — серверный язык программирования, применяется для разработки
+                    бэкенда. С помощью наших курсов вы познакомитесь с азами
+                    программирования на PHP, научитесь использовать
+                    объектно-ориентированное программирование (ООП) и работать с
+                    востребованными инструментами разработки, включая Lumen, Laravel,
+                    Composer, PHP Unit, Slim.
                   </p>
                 </div>
                 <div class="col-lg-4">
                   <div class="row no-gutters mb-3">
-                    <div class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3">
+                    <div
+                      class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3"
+                    >
                       <div class="fad fa-crown fa-2x text-warning"></div>
                     </div>
                     <div class="col">
@@ -1701,7 +1753,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Настройка окружения</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Настройка окружения
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Реальный опыт программирования возможен только если код запуск...
@@ -1840,7 +1894,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Веб-разработка на PHP</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Веб-разработка на PHP
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1868,7 +1924,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Eloquent (ORM)</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Eloquent (ORM)
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -1926,7 +1984,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Погружаясь в классы</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Погружаясь в классы
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2042,7 +2102,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Полиморфизм</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Полиморфизм
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2070,7 +2132,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Ввод и вывод</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Ввод и вывод
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2080,7 +2144,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/php-io"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/php-io"
                             >Посмотреть
                           </a>
                         </div>
@@ -2104,7 +2170,8 @@
                         </div>
                       </div>
                       <div class="text-muted mb-2">
-                        Этот курс является адаптацией под php знаменитого курса &quot;Струк...
+                        Этот курс является адаптацией под php знаменитого курса
+                        &quot;Струк...
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
@@ -2216,7 +2283,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Составные данные</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Составные данные
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2244,7 +2313,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Последовательности</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Последовательности
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2272,7 +2343,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">PHP: Введение в ООП</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          PHP: Введение в ООП
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2300,16 +2373,18 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    Python — один из самых популярных языков программирования. Он применяется в
-                    веб-разработке, работе с Big Data, искусственным интеллектом и машинным
-                    обучением, в науке и других сферах. На курсах Хекслета вы научитесь
-                    программировать на Python и работать с современными инструментами, включая
-                    Flake8, Flask, Django.
+                    Python — один из самых популярных языков программирования. Он
+                    применяется в веб-разработке, работе с Big Data, искусственным
+                    интеллектом и машинным обучением, в науке и других сферах. На курсах
+                    Хекслета вы научитесь программировать на Python и работать с
+                    современными инструментами, включая Flake8, Flask, Django.
                   </p>
                 </div>
                 <div class="col-lg-4">
                   <div class="row no-gutters mb-3">
-                    <div class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3">
+                    <div
+                      class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3"
+                    >
                       <div class="fad fa-crown fa-2x text-warning"></div>
                     </div>
                     <div class="col">
@@ -2439,7 +2514,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Микрофреймворк Flask</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Микрофреймворк Flask
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2525,7 +2602,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Знакомство с Django</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Знакомство с Django
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2583,7 +2662,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Python: Введение в ООП</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Python: Введение в ООП
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2699,7 +2780,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Python: Составные данные</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Python: Составные данные
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2727,21 +2810,23 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    На курсах по вёрстке вы познакомитесь с основами HTML и CSS, научитесь верстать
-                    адаптивные страницы, работать с препроцессорами. Освоите современные технологии
-                    и инструменты, включая Flex, Sass, Bootstrap.
+                    На курсах по вёрстке вы познакомитесь с основами HTML и CSS, научитесь
+                    верстать адаптивные страницы, работать с препроцессорами. Освоите
+                    современные технологии и инструменты, включая Flex, Sass, Bootstrap.
                   </p>
                 </div>
                 <div class="col-lg-4">
                   <div class="row no-gutters mb-3">
-                    <div class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3">
+                    <div
+                      class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3"
+                    >
                       <div class="fad fa-book-reader fa-2x text-info"></div>
                     </div>
                     <div class="col">
                       <p class="mb-0">
                         Вступайте в профессию
-                        <a href="/professions/layout-designer">Верстальщик</a>. В ней курсы и
-                        проекты выстроены в оптимальном для изучения порядке.
+                        <a href="/professions/layout-designer">Верстальщик</a>. В ней
+                        курсы и проекты выстроены в оптимальном для изучения порядке.
                       </p>
                     </div>
                   </div>
@@ -2783,7 +2868,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Основы вёрстки контента</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Основы вёрстки контента
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Курс посвящён работе с контентом с помощью CSS и HTML. На сего...
@@ -2808,7 +2895,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">CSS: Позиционирование</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          CSS: Позиционирование
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2892,7 +2981,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">CSS: Адаптивность</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          CSS: Адаптивность
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2948,7 +3039,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Bootstrap: Основы</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Bootstrap: Основы
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -2976,7 +3069,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">SASS: Программирование</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          SASS: Программирование
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3013,7 +3108,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/html"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/html"
                             >Посмотреть
                           </a>
                         </div>
@@ -3029,7 +3126,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Введение в веб-разработку</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Введение в веб-разработку
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Прежде чем перейти к написанию первой программы, мы систематиз...
@@ -3054,23 +3153,25 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    Java входит в число наиболее популярных языков программирования. Применяется для
-                    веб- и мобильной разработки, создания десктопных приложений. Java считается
-                    основным языком программирования в энтерпрайз-разработке. Вы научитесь
-                    программировать на Java и познакомитесь с современными инструментами
-                    Java-разработчика.
+                    Java входит в число наиболее популярных языков программирования.
+                    Применяется для веб- и мобильной разработки, создания десктопных
+                    приложений. Java считается основным языком программирования в
+                    энтерпрайз-разработке. Вы научитесь программировать на Java и
+                    познакомитесь с современными инструментами Java-разработчика.
                   </p>
                 </div>
                 <div class="col-lg-4">
                   <div class="row no-gutters mb-3">
-                    <div class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3">
+                    <div
+                      class="col-2 col-sm-1 col-lg-2 d-flex justify-content-center mr-3"
+                    >
                       <div class="fad fa-book-reader fa-2x text-info"></div>
                     </div>
                     <div class="col">
                       <p class="mb-0">
                         Вступайте в профессию
-                        <a href="/professions/java">Java-программист</a>. В ней курсы и проекты
-                        выстроены в оптимальном для изучения порядке.
+                        <a href="/professions/java">Java-программист</a>. В ней курсы и
+                        проекты выстроены в оптимальном для изучения порядке.
                       </p>
                     </div>
                   </div>
@@ -3115,7 +3216,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Java: Составные данные</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Java: Составные данные
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3171,7 +3274,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Java: Структуры данных</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Java: Структуры данных
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3199,7 +3304,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Java для веб-сервисов</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Java для веб-сервисов
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3255,7 +3362,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Java: Многопоточность</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Java: Многопоточность
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3323,7 +3432,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/aws"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/aws"
                             >Посмотреть
                           </a>
                         </div>
@@ -3339,8 +3450,8 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    SQL — язык управления базами данных. Вы научитесь писать SQL-запросы и работать
-                    с реляционными базами данных.
+                    SQL — язык управления базами данных. Вы научитесь писать SQL-запросы и
+                    работать с реляционными базами данных.
                   </p>
                 </div>
               </div>
@@ -3413,7 +3524,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Базы данных: SQL (DQL)</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Базы данных: SQL (DQL)
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3441,9 +3554,9 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    Эта группа курсов поможет разобраться с операционной системой Linux, научиться
-                    работать с Git и командной строкой. Это базовые знания, необходимые всем
-                    программистам.
+                    Эта группа курсов поможет разобраться с операционной системой Linux,
+                    научиться работать с Git и командной строкой. Это базовые знания,
+                    необходимые всем программистам.
                   </p>
                 </div>
               </div>
@@ -3481,7 +3594,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Основы командной строки</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Основы командной строки
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Командная строка — это первое, с чем сталкивается программист,...
@@ -3534,7 +3649,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Linux: Пользователи</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Linux: Пользователи
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3562,8 +3679,8 @@
               <div class="row">
                 <div class="col-lg mb-3 mb-lg-0">
                   <p class="lead font-weight-normal mr-lg-4">
-                    Изучайте операционные системы, логику, английский язык и другие темы, полезные
-                    для программистов.
+                    Изучайте операционные системы, логику, английский язык и другие темы,
+                    полезные для программистов.
                   </p>
                 </div>
               </div>
@@ -3576,7 +3693,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Жизнь программиста</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Жизнь программиста
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Начните погружение в профессию с ответа на простые, но очень в...
@@ -3629,7 +3748,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Операционные системы</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Операционные системы
+                        </h3>
                       </div>
                       <div class="text-muted mb-2">
                         Курс посвящен главным принципам, лежащим в основе дизайна опер...
@@ -3688,7 +3809,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/logic"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/logic"
                             >Посмотреть
                           </a>
                         </div>
@@ -3736,7 +3859,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/ruby"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/ruby"
                             >Посмотреть
                           </a>
                         </div>
@@ -3761,7 +3886,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/sicp"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/sicp"
                             >Посмотреть
                           </a>
                         </div>
@@ -3777,7 +3904,9 @@
                     </div>
                     <div class="card-body d-flex flex-column">
                       <div class="row flex-wrap-reverse px-3">
-                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">Регулярные выражения</h3>
+                        <h3 class="h5 col-auto col-sm-10 mr-auto p-0">
+                          Регулярные выражения
+                        </h3>
                         <div>
                           <span class="badge badge-light p-0">PRO</span>
                         </div>
@@ -3787,7 +3916,9 @@
                       </div>
                       <div class="mt-auto d-flex">
                         <div class="ml-auto">
-                          <a class="x-link-without-decoration stretched-link" href="/courses/regexp"
+                          <a
+                            class="x-link-without-decoration stretched-link"
+                            href="/courses/regexp"
                             >Посмотреть
                           </a>
                         </div>
@@ -3807,7 +3938,8 @@
                         Индивидуальное обучение программированию
                       </h2>
                       <p class="mb-4 text-white">
-                        Освойте JavaScript, PHP или Python под руководством опытного наставника
+                        Освойте JavaScript, PHP или Python под руководством опытного
+                        наставника
                       </p>
                       <a
                         class="btn btn-light btn-block stretched-link mt-auto"
@@ -3828,7 +3960,9 @@
                       <p class="mb-4 text-white">
                         Самые актуальные профессии в разработке веб-приложений
                       </p>
-                      <a class="btn btn-light btn-block stretched-link mt-auto" href="/professions"
+                      <a
+                        class="btn btn-light btn-block stretched-link mt-auto"
+                        href="/professions"
                         ><span class="fad fa-graduation-cap mr-2 text-secondary"></span>
                         Все профессии
                       </a>
@@ -3839,12 +3973,16 @@
                 <div class="col mb-4">
                   <div class="card h-100 shadow-sm bg-info">
                     <div class="card-body d-flex flex-column">
-                      <h2 class="h5 mb-3 text-light font-weight-bold">Хотите углубить знания?</h2>
+                      <h2 class="h5 mb-3 text-light font-weight-bold">
+                        Хотите углубить знания?
+                      </h2>
                       <p class="mb-4 text-white">
-                        Треки — ваш выбор. Это готовые наборы курсов для прокачивания знаний и
-                        умений
+                        Треки — ваш выбор. Это готовые наборы курсов для прокачивания
+                        знаний и умений
                       </p>
-                      <a class="btn btn-light btn-block stretched-link mt-auto" href="/tracks"
+                      <a
+                        class="btn btn-light btn-block stretched-link mt-auto"
+                        href="/tracks"
                         ><span class="fad fa-code mr-2 text-info"></span>
                         Все треки
                       </a>
@@ -3937,7 +4075,9 @@
                 <a class="x-link-only-hover" href="/testimonials">Отзывы студентов</a>
               </li>
               <li class="mb-1">
-                <a class="x-link-only-hover" href="/blog/categories/success">Истории успеха</a>
+                <a class="x-link-only-hover" href="/blog/categories/success"
+                  >Истории успеха</a
+                >
               </li>
               <li class="mb-1">
                 <a
@@ -3954,14 +4094,18 @@
                 >UMA Esplanadi, Pohjoisesplanadi 39, 00100 Helsinki, Finland</span
               >
               <span class="d-block">VAT ID: FI26641607</span>
-              <span class="d-block"><a href="tel:+7(495)147-73-79">+7 (495) 147-73-79</a></span>
+              <span class="d-block"
+                ><a href="tel:+7(495)147-73-79">+7 (495) 147-73-79</a></span
+              >
             </p>
             <ul class="list-unstyled">
               <li class="mb-1">
                 <a class="x-link-only-hover" href="/pages/tos">Условия использования</a>
               </li>
               <li class="mb-1">
-                <a class="x-link-only-hover" href="/pages/privacy">Политика конфиденциальности</a>
+                <a class="x-link-only-hover" href="/pages/privacy"
+                  >Политика конфиденциальности</a
+                >
               </li>
             </ul>
           </div>
@@ -4000,13 +4144,17 @@
                 >
               </li>
               <li class="mb-1">
-                <a class="x-link-only-hover" href="/professions/frontend">Фронтенд JavaScript</a>
+                <a class="x-link-only-hover" href="/professions/frontend"
+                  >Фронтенд JavaScript</a
+                >
               </li>
               <li class="mb-1">
                 <a class="x-link-only-hover" href="/professions/php">PHP-программист</a>
               </li>
               <li class="mb-1">
-                <a class="x-link-only-hover" href="/professions/python">Python-программист</a>
+                <a class="x-link-only-hover" href="/professions/python"
+                  >Python-программист</a
+                >
               </li>
               <li class="mb-1">
                 <a class="x-link-only-hover" href="/professions/backend"
@@ -4057,7 +4205,9 @@
                 >
               </li>
               <li class="mb-1">
-                <a class="x-link-only-hover" href="/categories/sandbox/courses">Песочница</a>
+                <a class="x-link-only-hover" href="/categories/sandbox/courses"
+                  >Песочница</a
+                >
               </li>
               <li class="mb-1">
                 <a
@@ -4087,7 +4237,10 @@
                 <a class="x-link-only-hover" href="/community">Вопросы по урокам</a>
               </li>
               <li class="mb-1">
-                <a rel="nofollow" class="x-link-only-hover" href="mailto:support@hexlet.io"
+                <a
+                  rel="nofollow"
+                  class="x-link-only-hover"
+                  href="mailto:support@hexlet.io"
                   >support@hexlet.io</a
                 >
               </li>

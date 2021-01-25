@@ -35,9 +35,13 @@ const changeImagesSrc = (data, pathToImagesDir, host) => {
 	const $ = cheerio.load(data);
 	const linkElements = $('img').map((_i, imgEl) => {
 		const oldSrc = $(imgEl).attr('src');
-		const newSrc = path.resolve(pathToImagesDir, oldSrc.slice(oldSrc.lastIndexOf('/') + 1));
+		const newSrc = path.resolve(
+			pathToImagesDir,
+			oldSrc.slice(oldSrc.lastIndexOf('/') + 1)
+		);
 		$(imgEl).attr('src', newSrc);
-		if (oldSrc.includes('static') || oldSrc.includes('library')) return `https://${host}${oldSrc}`;
+		if (_.startsWith('/static/', oldSrc) || _.startsWith('/library/', oldSrc))
+			return `https://${host}${oldSrc}`;
 		return `https:${oldSrc}`;
 	});
 	const imgLinks = linkElements.toArray().filter((link) => {
@@ -55,8 +59,15 @@ export default (uri, outputDir, downloadSrcFunc = downloadImages) => {
 		.then(
 			({ data }) => {
 				const absolutePath = path.resolve(outputDir);
-				const pathToImagesDir = path.join(absolutePath, makeName(`${url.host}${url.pathname}`));
-				const { imgLinks, updatedHTML } = changeImagesSrc(data, pathToImagesDir, url.host);
+				const pathToImagesDir = path.join(
+					absolutePath,
+					makeName(`${url.host}${url.pathname}`)
+				);
+				const { imgLinks, updatedHTML } = changeImagesSrc(
+					data,
+					pathToImagesDir,
+					url.host
+				);
 				// console.log('imgLinks=>', imgLinks);
 				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
 				const filename = makeName(`${url.host}${url.pathname}`, '.html');
