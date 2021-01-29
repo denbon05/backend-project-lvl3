@@ -4,28 +4,30 @@ import { promises as fs } from 'fs';
 import path, { dirname } from 'path';
 import os from 'os';
 import nock from 'nock';
+import prettier from 'prettier';
 import { fileURLToPath } from 'url';
-import cheerio from 'cheerio';
 import pageLoader, { makeName } from '../src/app.js';
 
 // @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// const hexletUrl = 'https://ru.hexlet.io';
-const wikiUrl = 'https://en.wikipedia.org/wiki/Home_page';
-const wikiFileName = 'wiki-home.html';
+const wikiUrl = 'https://en.wikipedia.org';
 
-const getPath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
-const mockFuncDownloadSrc = (links, pathToImagesDir) => {
-	fs.mkdir(pathToImagesDir);
-	links.forEach(async (link) => {
-		const ext = path.extname(link);
-		const imgName = makeName(link, ext);
-		const pathToImg = path.join(pathToImagesDir, imgName);
-		await fs.writeFile(pathToImg, '');
-	});
-};
+const wikiFileName = 'wiki.html';
+const changedHtmlFileName = 'en-wikipedia-org.html';
+const srcFolderName = 'en-wikipedia-org_files';
+const wikiLogoPng = 'en-wikipedia-org-static-apple-touch-wikipedia.png';
+const fileJsName = 'en-wikipedia-org-some.js';
+const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
+
+let tempDir;
+let fileOutputPath;
+const src = {};
+
+const getFixturePath = (filename, dir = '') =>
+	path.join(__dirname, '..', '__fixtures__', dir, filename);
+const getSrcPath = (filename) => path.join(tempDir, srcFolderName, filename);
 
 nock.disableNetConnect();
 
@@ -35,35 +37,40 @@ test('transform name to kebabCase', () => {
 });
 
 describe('download page and src', () => {
-	let tempDir;
-	let fileOutputPath;
-
-	const { href, origin, pathname } = new URL(wikiUrl);
-
 	beforeAll(async () => {
+		src.expectedHtml = await fs.readFile(getFixturePath(wikiFileName), 'utf-8');
+		src.expectedLogoPng = await fs.readFile(getFixturePath(wikiLogoPng, srcFolderName));
+		src.expectedPhpData = await fs.readFile(getFixturePath(phpFileName, srcFolderName), 'utf-8');
+		src.expectedJsData = await fs.readFile(getFixturePath(fileJsName, srcFolderName), 'utf-8');
 		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-		const data = await fs.readFile(getPath(wikiFileName), 'utf-8');
-		nock(origin).get(pathname).reply(200, data);
-		fileOutputPath = await pageLoader(href, tempDir, mockFuncDownloadSrc);
+		nock(wikiUrl)
+			.get('/')
+			.reply(200, src.expectedHtml)
+			.get('/static/apple-touch/wikipedia.png')
+			.reply(200, src.expectedLogoPng)
+			.get('/w/opensearch_desc.php')
+			.reply(200, src.expectedPhpData)
+			.get('/some.js')
+			.reply(200, src.expectedJsData);
+		fileOutputPath = await pageLoader(wikiUrl, tempDir);
 	});
 
 	test('update src in html', async () => {
-		// console.log('tempDir=>	', tempDir);
 		const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
-		const $ = cheerio.load(loadedHtml);
-		$('img')
-			.filter(
-				(_i, el) =>
-					path.extname($(el).attr('src')) === '.png' || path.extname($(el).attr('src')) === '.img'
-			)
-			.each((_i, imgEl) => expect($(imgEl).attr('src').includes(tempDir)).toBeTruthy());
+		const expectedHTML = await fs.readFile(getFixturePath(changedHtmlFileName), 'utf-8');
+		expect(loadedHtml).toEqual(prettier.format(expectedHTML, { parser: 'html' }));
 	});
 
-	test('download src', async () => {
+	test('compare downloaded src', async () => {
+		const actualLogoPng = await fs.readFile(getSrcPath(wikiLogoPng));
+		const actualJsData = await fs.readFile(getSrcPath(fileJsName), 'utf-8');
+		const actualPhpData = await fs.readFile(getSrcPath(phpFileName), 'utf-8');
 		const downloadDir = path.dirname(fileOutputPath);
-		const pathToImagesDir = path.join(downloadDir, 'en-wikipedia-org-wiki-home-page_files');
-		const filesSrc = await fs.readdir(pathToImagesDir);
-		// console.log('images->', images);
-		expect(filesSrc).toHaveLength(8);
+		const pathToSrcDir = path.join(downloadDir, srcFolderName);
+		const filesSrc = await fs.readdir(pathToSrcDir);
+		expect(filesSrc).toHaveLength(3);
+		expect(actualLogoPng).toEqual(src.expectedLogoPng);
+		expect(actualJsData).toEqual(src.expectedJsData);
+		expect(actualPhpData).toEqual(src.expectedPhpData);
 	});
 });

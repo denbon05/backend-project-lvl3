@@ -12,4 +12,10 @@
 
 <pre>page-loader https://en.wikipedia.org/wiki/Home_page</pre>
 
-[![asciicast](https://asciinema.org/a/387043.svg)](https://asciinema.org/a/387043)
+[![asciicast](https://asciinema.org/a/387242.svg)](https://asciinema.org/a/387242)
+
+#### Debug page-loader
+
+<pre>DEBUG=page-loader page-loader https://en.wikipedia.org/wiki/Home_page</pre>
+
+[![asciicast](https://asciinema.org/a/387835.svg)](https://asciinema.org/a/387835)

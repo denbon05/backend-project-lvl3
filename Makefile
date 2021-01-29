@@ -9,6 +9,9 @@ install-deps:
 test:
 	npm test
 
+nock debug-nock:
+	DEBUG=nock.scope:* npm test
+
 format:
 	npx prettier --write .
 
