@@ -31,11 +31,13 @@ export const makeName = (fullname, extension = null) => {
 };
 
 const isLocalSrc = (link) => {
-	const isLocal = !_.startsWith(link, '//') && _.startsWith(link, '/') && path.extname(link).length <= 4;
+	const isLocal =
+		!_.startsWith(link, '//') &&
+		_.startsWith(link, '/') &&
+		_.inRange(path.extname(link).length, 3, 5);
 	logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
 	return isLocal;
-}
-	
+};
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
 	const coll = links.map((link) => {
