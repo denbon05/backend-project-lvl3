@@ -30,8 +30,12 @@ export const makeName = (fullname, extension = null) => {
 	return [_.kebabCase(`${name}`), 'files'].join('_');
 };
 
-const isLocalSrc = (link) =>
-	!_.startsWith(link, '//') && _.startsWith(link, '/') && path.extname(link).length <= 4;
+const isLocalSrc = (link) => {
+	const isLocal = !_.startsWith(link, '//') && _.startsWith(link, '/') && path.extname(link).length <= 4;
+	logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
+	return isLocal;
+}
+	
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
 	const coll = links.map((link) => {
@@ -85,7 +89,9 @@ export default (uri, outputDir = process.cwd()) => {
 		)
 		.then(
 			({ data }) => {
+				logPageLoader('fetched html %O', data);
 				const url = new URL(uri.trim());
+				logPageLoader('parsed url %O', url);
 				const absolutePath = path.resolve(outputDir);
 				const dirSrcName = makeName(`${url.host}${url.pathname}`);
 				const filename = makeName(`${url.host}${url.pathname}`, '.html');
