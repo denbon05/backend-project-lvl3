@@ -36,13 +36,16 @@ test('transform name to kebabCase', () => {
 	expect(makeName('en.wikipedia.org/home/page')).toEqual('en-wikipedia-org-home-page_files');
 });
 
+beforeAll(async () => {
+	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+});
+
 describe('download page and src', () => {
 	beforeAll(async () => {
 		src.expectedHtml = await fs.readFile(getFixturePath(wikiFileName), 'utf-8');
 		src.expectedLogoPng = await fs.readFile(getFixturePath(wikiLogoPng, srcFolderName));
 		src.expectedPhpData = await fs.readFile(getFixturePath(phpFileName, srcFolderName), 'utf-8');
 		src.expectedJsData = await fs.readFile(getFixturePath(fileJsName, srcFolderName), 'utf-8');
-		tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 		nock(wikiUrl)
 			.get('/')
 			.reply(200, src.expectedHtml)
@@ -73,4 +76,22 @@ describe('download page and src', () => {
 		expect(actualJsData).toEqual(src.expectedJsData);
 		expect(actualPhpData).toEqual(src.expectedPhpData);
 	});
+});
+
+test('get wrong path in url', async () => {
+	nock(wikiUrl).get('/wrongpath').reply(404);
+	const wrongPath = `${wikiUrl}/wrongpath`;
+	await expect(pageLoader(wrongPath, tempDir)).rejects.toThrow('404');
+});
+
+test('wrong url', async () => {
+	nock.enableNetConnect();
+	await expect(pageLoader('http;//some.org', tempDir)).rejects.toThrow('400');
+});
+
+test('save page to not existing dir', async () => {
+	nock(wikiUrl).get('/somePage').reply(200, '<html><head></head><body></body></html>');
+	const someUrl = `${wikiUrl}/somePage`;
+	const wrongPath = '/bad/way';
+	await expect(pageLoader(someUrl, wrongPath)).rejects.toThrow('ENOENT');
 });

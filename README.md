@@ -19,3 +19,7 @@
 <pre>DEBUG=page-loader page-loader https://en.wikipedia.org/wiki/Home_page</pre>
 
 [![asciicast](https://asciinema.org/a/387835.svg)](https://asciinema.org/a/387835)
+
+#### Errors handle
+
+[![asciicast](https://asciinema.org/a/388218.svg)](https://asciinema.org/a/388218)
