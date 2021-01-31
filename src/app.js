@@ -8,6 +8,7 @@ import cheerio from 'cheerio';
 import prettier from 'prettier';
 import debug from 'debug';
 import axiosDebug from 'axios-debug-log';
+import Listr from 'listr';
 
 axiosDebug({
 	request: (logAxios, config) => {
@@ -33,17 +34,19 @@ const isLocalSrc = (link) =>
 	!_.startsWith(link, '//') && _.startsWith(link, '/') && path.extname(link).length <= 4;
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
-	links.forEach((link) => {
-		const filename = link.slice(0, link.lastIndexOf('.'));
-		const filepath = path.join(pathToDirSrcFiles, makeName(filename, path.extname(link)));
-		if (['.img', '.png', '.ico'].includes(path.extname(link))) {
+	const coll = links.map((link) => {
+		const filenameWithoutExt = link.slice(0, link.lastIndexOf('.'));
+		const filename = makeName(filenameWithoutExt, path.extname(link));
+		const filepath = path.join(pathToDirSrcFiles, filename);
+		const listrTask = { title: `Download into '${filename}'` };
+		listrTask.task = () =>
 			axios
-				.get(link, { responseType: 'stream' })
-				.then(({ data }) => data.pipe(fs.createWriteStream(filepath)));
-		} else {
-			axios.get(link).then(({ data }) => fsPromises.writeFile(filepath, data, 'utf-8'));
-		}
+				.get(link, { responseType: 'arraybuffer' })
+				.then(({ data }) => fsPromises.writeFile(filepath, data));
+		return listrTask;
 	});
+	const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
+	return tasks;
 };
 
 const changeSrc = (data, dirSrcName, host) => {
@@ -102,11 +105,13 @@ export default (uri, outputDir = process.cwd()) => {
 			({ links, pathToDirSrcFiles }) => {
 				if (links.length > 0) {
 					fsPromises.mkdir(pathToDirSrcFiles);
-					downloadSrc(links, pathToDirSrcFiles);
+					return downloadSrc(links, pathToDirSrcFiles);
 				}
+				return null;
 			},
 			(err) => Promise.reject(err)
 		)
+		.then((tasks) => (tasks ? tasks.run() : null))
 		.then(() => filePath)
 		.catch((err) => Promise.reject(err));
 };

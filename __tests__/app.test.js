@@ -21,9 +21,11 @@ const wikiLogoPng = 'en-wikipedia-org-static-apple-touch-wikipedia.png';
 const fileJsName = 'en-wikipedia-org-some.js';
 const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
 
+const simplePage = '<html><head></head><body><h1>Very simple page</h1></body></html>';
+const formatedHTML = prettier.format(simplePage, { parser: 'html' });
+
 let tempDir;
 let fileOutputPath;
-const src = {};
 
 const getFixturePath = (filename, dir = '') =>
 	path.join(__dirname, '..', '__fixtures__', dir, filename);
@@ -36,46 +38,39 @@ test('transform name to kebabCase', () => {
 	expect(makeName('en.wikipedia.org/home/page')).toEqual('en-wikipedia-org-home-page_files');
 });
 
-beforeAll(async () => {
+beforeEach(async () => {
 	tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
-describe('download page and src', () => {
-	beforeAll(async () => {
-		src.expectedHtml = await fs.readFile(getFixturePath(wikiFileName), 'utf-8');
-		src.expectedLogoPng = await fs.readFile(getFixturePath(wikiLogoPng, srcFolderName));
-		src.expectedPhpData = await fs.readFile(getFixturePath(phpFileName, srcFolderName), 'utf-8');
-		src.expectedJsData = await fs.readFile(getFixturePath(fileJsName, srcFolderName), 'utf-8');
-		nock(wikiUrl)
-			.get('/')
-			.reply(200, src.expectedHtml)
-			.get('/static/apple-touch/wikipedia.png')
-			.reply(200, src.expectedLogoPng)
-			.get('/w/opensearch_desc.php')
-			.reply(200, src.expectedPhpData)
-			.get('/some.js')
-			.reply(200, src.expectedJsData);
-		fileOutputPath = await pageLoader(wikiUrl, tempDir);
-	});
+test('download page and src', async () => {
+	const expectedHtml = await fs.readFile(getFixturePath(wikiFileName), 'utf-8');
+	const expectedLogoPng = await fs.readFile(getFixturePath(wikiLogoPng, srcFolderName));
+	const expectedPhpData = await fs.readFile(getFixturePath(phpFileName, srcFolderName), 'utf-8');
+	const expectedJsData = await fs.readFile(getFixturePath(fileJsName, srcFolderName), 'utf-8');
+	nock(wikiUrl)
+		.get('/')
+		.reply(200, expectedHtml)
+		.get('/static/apple-touch/wikipedia.png')
+		.reply(200, expectedLogoPng)
+		.get('/w/opensearch_desc.php')
+		.reply(200, expectedPhpData)
+		.get('/some.js')
+		.reply(200, expectedJsData);
+	fileOutputPath = await pageLoader(wikiUrl, tempDir);
 
-	test('update src in html', async () => {
-		const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
-		const expectedHTML = await fs.readFile(getFixturePath(changedHtmlFileName), 'utf-8');
-		expect(loadedHtml).toEqual(prettier.format(expectedHTML, { parser: 'html' }));
-	});
-
-	test('compare downloaded src', async () => {
-		const actualLogoPng = await fs.readFile(getSrcPath(wikiLogoPng));
-		const actualJsData = await fs.readFile(getSrcPath(fileJsName), 'utf-8');
-		const actualPhpData = await fs.readFile(getSrcPath(phpFileName), 'utf-8');
-		const downloadDir = path.dirname(fileOutputPath);
-		const pathToSrcDir = path.join(downloadDir, srcFolderName);
-		const filesSrc = await fs.readdir(pathToSrcDir);
-		expect(filesSrc).toHaveLength(3);
-		expect(actualLogoPng).toEqual(src.expectedLogoPng);
-		expect(actualJsData).toEqual(src.expectedJsData);
-		expect(actualPhpData).toEqual(src.expectedPhpData);
-	});
+	const actualLogoPng = await fs.readFile(getSrcPath(wikiLogoPng));
+	const actualJsData = await fs.readFile(getSrcPath(fileJsName), 'utf-8');
+	const actualPhpData = await fs.readFile(getSrcPath(phpFileName), 'utf-8');
+	const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
+	const expectedHTML = await fs.readFile(getFixturePath(changedHtmlFileName), 'utf-8');
+	const downloadDir = path.dirname(fileOutputPath);
+	const pathToSrcDir = path.join(downloadDir, srcFolderName);
+	const filesSrc = await fs.readdir(pathToSrcDir);
+	expect(loadedHtml).toEqual(prettier.format(expectedHTML, { parser: 'html' }));
+	expect(filesSrc).toHaveLength(3);
+	expect(actualLogoPng).toEqual(expectedLogoPng);
+	expect(actualJsData).toEqual(expectedJsData);
+	expect(actualPhpData).toEqual(expectedPhpData);
 });
 
 test('get wrong path in url', async () => {
@@ -86,12 +81,18 @@ test('get wrong path in url', async () => {
 
 test('wrong url', async () => {
 	nock.enableNetConnect();
-	await expect(pageLoader('http;//some.org', tempDir)).rejects.toThrow('400');
+	await expect(pageLoader('http;//some.org', tempDir)).rejects.toThrow();
 });
 
 test('save page to not existing dir', async () => {
-	nock(wikiUrl).get('/somePage').reply(200, '<html><head></head><body></body></html>');
+	nock(wikiUrl).get('/somePage').reply(200, simplePage);
 	const someUrl = `${wikiUrl}/somePage`;
 	const wrongPath = '/bad/way';
 	await expect(pageLoader(someUrl, wrongPath)).rejects.toThrow('ENOENT');
+});
+
+test('page without links', async () => {
+	nock(wikiUrl).get('/simplePage').reply(200, simplePage);
+	fileOutputPath = await pageLoader(`${wikiUrl}/simplePage`, tempDir);
+	expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatedHTML);
 });
