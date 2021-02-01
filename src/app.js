@@ -62,12 +62,7 @@ const changeSrc = (data, dirSrcName, { host, origin }) => {
 		['link', 'href'],
 	].map(([tag, atrrName]) =>
 		$(tag)
-			.filter((_i, el) => {
-				const filtred = !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin);
-				logPageLoader('!!$(el).attr(atrrName) => %O', $(!!$(el).attr(atrrName)));
-				logPageLoader('isLocalSrc($(el).attr(atrrName), origin) => %O', $(isLocalSrc($(el).attr(atrrName), origin)));
-				return filtred;
-			})
+			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
 			.map((_i, parsedEl) => {
 				const oldAttrValue = $(parsedEl).attr(atrrName);
 				const ext = path.extname(oldAttrValue);
@@ -89,14 +84,13 @@ export default (uri, outputDir = process.cwd()) => {
 	let filePath;
 	logPageLoader('start downloading page with url %o', uri);
 	return fsPromises
-		.access(outputDir, fs.constants.F_OK)
+		.access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
 		.then(
 			() => axios.get(uri),
 			(err) => Promise.reject(err)
 		)
 		.then(
 			({ data }) => {
-				logPageLoader('fetched html %O', data);
 				const url = new URL(uri.trim());
 				logPageLoader('parsed url %O', url);
 				const absolutePath = path.resolve(outputDir);
@@ -107,7 +101,11 @@ export default (uri, outputDir = process.cwd()) => {
 				const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
 				logPageLoader('local src links on page %O', links);
 				// console.log('links=>', links);
-				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
+				const formatedHTML = prettier.format(updatedHTML, {
+					parser: 'html',
+					printWidth: 120,
+					tabWidth: 4,
+				});
 				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
 				return { links, pathToDirSrcFiles };
 			},

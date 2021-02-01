@@ -22,7 +22,8 @@ const fileJsName = 'en-wikipedia-org-some.js';
 const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
 
 const simplePage = '<html><head></head><body><h1>Very simple page</h1></body></html>';
-const formatedHTML = prettier.format(simplePage, { parser: 'html' });
+const formatHtml = (html) =>
+	prettier.format(html, { parser: 'html', printWidth: 120, tabWidth: 4 });
 
 let tempDir;
 let fileOutputPath;
@@ -66,7 +67,7 @@ test('download page and src', async () => {
 	const downloadDir = path.dirname(fileOutputPath);
 	const pathToSrcDir = path.join(downloadDir, srcFolderName);
 	const filesSrc = await fs.readdir(pathToSrcDir);
-	expect(loadedHtml).toEqual(prettier.format(expectedHTML, { parser: 'html' }));
+	expect(loadedHtml).toEqual(formatHtml(expectedHTML));
 	expect(filesSrc).toHaveLength(3);
 	expect(actualLogoPng).toEqual(expectedLogoPng);
 	expect(actualJsData).toEqual(expectedJsData);
@@ -94,5 +95,11 @@ test('save page to not existing dir', async () => {
 test('page without links', async () => {
 	nock(wikiUrl).get('/simplePage').reply(200, simplePage);
 	fileOutputPath = await pageLoader(`${wikiUrl}/simplePage`, tempDir);
-	expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatedHTML);
+	const html = await fs.readFile(fileOutputPath, 'utf-8');
+	expect(html).toEqual(formatHtml(html));
+});
+
+test('to be permision denied', async () => {
+	nock(wikiUrl).get('/simplePage').reply(200, simplePage);
+	await expect(pageLoader(`${wikiUrl}/simplePage`, '/sys')).rejects.toThrow('EACCES');
 });
