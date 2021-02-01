@@ -104,7 +104,7 @@ export default (uri, outputDir = process.cwd()) => {
 				const formatedHTML = prettier.format(updatedHTML, {
 					parser: 'html',
 					printWidth: 120,
-					tabWidth: 4,
+					tabWidth: 4
 				});
 				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
 				return { links, pathToDirSrcFiles };

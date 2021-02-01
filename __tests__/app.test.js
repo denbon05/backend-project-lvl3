@@ -85,21 +85,26 @@ test('wrong url', async () => {
 	await expect(pageLoader('http;//some.org', tempDir)).rejects.toThrow();
 });
 
-test('save page to not existing dir', async () => {
-	nock(wikiUrl).get('/somePage').reply(200, simplePage);
-	const someUrl = `${wikiUrl}/somePage`;
-	const wrongPath = '/bad/way';
-	await expect(pageLoader(someUrl, wrongPath)).rejects.toThrow('ENOENT');
-});
+describe('check negative cases', () => {
+	beforeEach(() => nock(wikiUrl).get('/simplePage').reply(200, simplePage));
+	const someUrl = `${wikiUrl}/simplePage`;
 
-test('page without links', async () => {
-	nock(wikiUrl).get('/simplePage').reply(200, simplePage);
-	fileOutputPath = await pageLoader(`${wikiUrl}/simplePage`, tempDir);
-	const html = await fs.readFile(fileOutputPath, 'utf-8');
-	expect(html).toEqual(formatHtml(html));
-});
+	test('save page to not existing dir', async () => {
+		const wrongPath = '/bad/way';
+		await expect(pageLoader(someUrl, wrongPath)).rejects.toThrow('ENOENT');
+	});
 
-test('to be permision denied', async () => {
-	nock(wikiUrl).get('/simplePage').reply(200, simplePage);
-	await expect(pageLoader(`${wikiUrl}/simplePage`, '/sys')).rejects.toThrow('EACCES');
+	test('page without links', async () => {
+		fileOutputPath = await pageLoader(someUrl, tempDir);
+		expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatHtml(simplePage));
+	});
+
+	test('will be permission denied', async () => {
+		await expect(pageLoader(someUrl, '/sys')).rejects.toThrow('EACCES');
+	});
+
+	test('path is not a directory', async () => {
+		await fs.appendFile(`${tempDir}/index.html`, '');
+		await expect(pageLoader(someUrl, '/index.html')).rejects.toThrow();
+	});
 });
