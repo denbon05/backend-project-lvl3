@@ -101,6 +101,7 @@ export default (uri, outputDir = process.cwd()) => {
 		)
 		.then(
 			({ data }) => {
+				logPageLoader('fetched data %O', data);
 				const url = new URL(uri.trim());
 				logPageLoader('parsed url %O', url);
 				const absolutePath = path.resolve(outputDir);
