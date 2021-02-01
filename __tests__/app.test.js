@@ -16,10 +16,11 @@ const wikiUrl = 'https://en.wikipedia.org';
 
 const wikiFileName = 'wiki.html';
 const changedHtmlFileName = 'en-wikipedia-org.html';
-const srcFolderName = 'en-wikipedia-org_files';
-const wikiLogoPng = 'en-wikipedia-org-static-apple-touch-wikipedia.png';
-const fileJsName = 'en-wikipedia-org-some.js';
-const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
+const srcFolderName = 'en-wikipedia-org-home_files';
+const wikiLogoPng = 'en-wikipedia-org-home-static-apple-touch-wikipedia.png';
+const fileJsName = 'en-wikipedia-org-home-some.js';
+const phpFileName = 'en-wikipedia-org-home-w-opensearch-desc.php';
+const homeFileName = 'en-wikipedia-org-home.html';
 
 const simplePage = '<html><head></head><body><h1>Very simple page</h1></body></html>';
 const formatHtml = (html) =>
@@ -56,19 +57,23 @@ test('download page and src', async () => {
 		.get('/w/opensearch_desc.php')
 		.reply(200, expectedPhpData)
 		.get('/some.js')
-		.reply(200, expectedJsData);
-	fileOutputPath = await pageLoader(wikiUrl, tempDir);
+		.reply(200, expectedJsData)
+		.get('/home')
+		.reply(200, expectedHtml);
+	fileOutputPath = await pageLoader(`${wikiUrl}/home`, tempDir);
 
 	const actualLogoPng = await fs.readFile(getSrcPath(wikiLogoPng));
 	const actualJsData = await fs.readFile(getSrcPath(fileJsName), 'utf-8');
 	const actualPhpData = await fs.readFile(getSrcPath(phpFileName), 'utf-8');
+	const actualHtmlHome = await fs.readFile(getSrcPath(homeFileName), 'utf-8');
 	const loadedHtml = await fs.readFile(fileOutputPath, 'utf-8');
 	const expectedHTML = await fs.readFile(getFixturePath(changedHtmlFileName), 'utf-8');
 	const downloadDir = path.dirname(fileOutputPath);
 	const pathToSrcDir = path.join(downloadDir, srcFolderName);
 	const filesSrc = await fs.readdir(pathToSrcDir);
+	expect(filesSrc).toHaveLength(4);
 	expect(loadedHtml).toEqual(formatHtml(expectedHTML));
-	expect(filesSrc).toHaveLength(3);
+	expect(actualHtmlHome).toEqual(formatHtml(expectedHTML));
 	expect(actualLogoPng).toEqual(expectedLogoPng);
 	expect(actualJsData).toEqual(expectedJsData);
 	expect(actualPhpData).toEqual(expectedPhpData);

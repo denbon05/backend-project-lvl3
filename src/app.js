@@ -30,31 +30,45 @@ export const makeName = (fullname, extension = null) => {
 	return [_.kebabCase(`${name}`), 'files'].join('_');
 };
 
+const isExtExist = (link) => {
+	const ext = path.extname(link);
+	const slashIdx = link.lastIndexOf('/');
+	const dotExtIdx = link.lastIndexOf('.');
+	return dotExtIdx > slashIdx && _.inRange(ext.length, 3, 6);
+};
+
 const isLocalSrc = (link, origin) => {
 	const isLocal =
-		((!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin)) &&
-		_.inRange(path.extname(link).length, 3, 5);
+		(!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
 	logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
 	return isLocal;
 };
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
 	const coll = links.map((link) => {
-		const filenameWithoutExt = link.slice(0, link.lastIndexOf('.'));
-		const filename = makeName(filenameWithoutExt, path.extname(link));
+		logPageLoader('link in downloadSrc %o', link);
+		const filenameWithoutExt = isExtExist(link) ? link.slice(0, link.lastIndexOf('.')) : link;
+		const ext = isExtExist(link) ? path.extname(link) : '.html';
+		const filename = makeName(filenameWithoutExt, ext);
+		logPageLoader('filename in downloadSrc %o', filename);
 		const filepath = path.join(pathToDirSrcFiles, filename);
 		const listrTask = { title: `Download into '${filename}'` };
 		listrTask.task = () =>
 			axios
 				.get(link, { responseType: 'arraybuffer' })
-				.then(({ data }) => fsPromises.writeFile(filepath, data));
+				.then(({ data }) => {
+					logPageLoader('data in DOWNLOADSRC=> %o', data)
+					return fsPromises.writeFile(filepath, data);
+				});
 		return listrTask;
 	});
+	if (coll.length === 0) return null;
 	const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
 	return tasks;
 };
 
-const changeSrc = (data, dirSrcName, { host, origin }) => {
+// prettier-ignore
+const changeSrc = (data, dirSrcName, { host, origin, href }) => {
 	const $ = cheerio.load(data);
 	const links = [
 		['img', 'src'],
@@ -65,17 +79,17 @@ const changeSrc = (data, dirSrcName, { host, origin }) => {
 			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
 			.map((_i, parsedEl) => {
 				const oldAttrValue = $(parsedEl).attr(atrrName);
-				const ext = path.extname(oldAttrValue);
-				const filename = makeName(
-					`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`,
-					ext
-				);
+				const ext = path.extname(oldAttrValue) || '.html';
+				const filename = ext !== '.html'
+						? makeName(`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`, ext)
+						: makeName(`${host}${oldAttrValue}`, '.html');
 				const newSrc = path.join(dirSrcName, filename);
+				logPageLoader(`new ${atrrName} in tag "${tag}" will be %o`, newSrc);
 				$(parsedEl).attr(atrrName, newSrc);
+				if (ext === '.html') return href;
 				if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
 				return `${origin}${oldAttrValue}`;
-			})
-			.toArray()
+			}).toArray()
 	);
 	return { links: _.flatten(links), updatedHTML: $.html() };
 };
@@ -110,8 +124,7 @@ export default (uri, outputDir = process.cwd()) => {
 				filePath = path.join(absolutePath, filename);
 				const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
 				const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
-				logPageLoader('local src links on page %O', links);
-				// console.log('links=>', links);
+				logPageLoader(`local src links on ${uri} %O`, links);
 				const formatedHTML = prettier.format(updatedHTML, {
 					parser: 'html',
 					printWidth: 120,
@@ -133,7 +146,7 @@ export default (uri, outputDir = process.cwd()) => {
 			},
 			(err) => Promise.reject(err)
 		)
-		.then((tasks) => (tasks ? tasks.run() : null))
+		.then((tasks) => tasks ? tasks.run() : null)
 		.then(() => filePath)
 		.catch((err) => Promise.reject(err));
 };
