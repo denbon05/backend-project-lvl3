@@ -30,10 +30,9 @@ export const makeName = (fullname, extension = null) => {
 	return [_.kebabCase(`${name}`), 'files'].join('_');
 };
 
-const isLocalSrc = (link) => {
+const isLocalSrc = (link, origin) => {
 	const isLocal =
-		!_.startsWith(link, '//') &&
-		_.startsWith(link, '/') &&
+		((!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin)) &&
 		_.inRange(path.extname(link).length, 3, 5);
 	logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
 	return isLocal;
@@ -55,7 +54,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 	return tasks;
 };
 
-const changeSrc = (data, dirSrcName, host) => {
+const changeSrc = (data, dirSrcName, host, origin) => {
 	const $ = cheerio.load(data);
 	const links = [
 		['img', 'src'],
@@ -63,7 +62,7 @@ const changeSrc = (data, dirSrcName, host) => {
 		['link', 'href'],
 	].map(([tag, atrrName]) =>
 		$(tag)
-			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName)))
+			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
 			.map((_i, parsedEl) => {
 				const oldAttrValue = $(parsedEl).attr(atrrName);
 				const ext = path.extname(oldAttrValue);
@@ -99,7 +98,7 @@ export default (uri, outputDir = process.cwd()) => {
 				const filename = makeName(`${url.host}${url.pathname}`, '.html');
 				filePath = path.join(absolutePath, filename);
 				const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
-				const { links, updatedHTML } = changeSrc(data, dirSrcName, url.host);
+				const { links, updatedHTML } = changeSrc(data, dirSrcName, url.host, url.origin);
 				logPageLoader('local src links on page %O', links);
 				// console.log('links=>', links);
 				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
