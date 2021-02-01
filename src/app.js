@@ -86,6 +86,16 @@ export default (uri, outputDir = process.cwd()) => {
 	return fsPromises
 		.access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
 		.then(
+			() => fsPromises.stat(outputDir),
+			(err) => Promise.reject(err)
+		)
+		.then(
+			(stat) => {
+				if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
+			},
+			(err) => Promise.reject(err)
+		)
+		.then(
 			() => axios.get(uri),
 			(err) => Promise.reject(err)
 		)
@@ -104,7 +114,7 @@ export default (uri, outputDir = process.cwd()) => {
 				const formatedHTML = prettier.format(updatedHTML, {
 					parser: 'html',
 					printWidth: 120,
-					tabWidth: 4
+					tabWidth: 4,
 				});
 				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
 				return { links, pathToDirSrcFiles };

@@ -86,7 +86,7 @@ test('wrong url', async () => {
 });
 
 describe('check negative cases', () => {
-	beforeEach(() => nock(wikiUrl).get('/simplePage').reply(200, simplePage));
+	beforeAll(() => nock(wikiUrl).get('/simplePage').reply(200, simplePage));
 	const someUrl = `${wikiUrl}/simplePage`;
 
 	test('save page to not existing dir', async () => {
@@ -94,17 +94,17 @@ describe('check negative cases', () => {
 		await expect(pageLoader(someUrl, wrongPath)).rejects.toThrow('ENOENT');
 	});
 
-	test('page without links', async () => {
-		fileOutputPath = await pageLoader(someUrl, tempDir);
-		expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatHtml(simplePage));
-	});
-
 	test('will be permission denied', async () => {
 		await expect(pageLoader(someUrl, '/sys')).rejects.toThrow('EACCES');
 	});
 
 	test('path is not a directory', async () => {
-		await fs.appendFile(`${tempDir}/index.html`, '');
-		await expect(pageLoader(someUrl, '/index.html')).rejects.toThrow();
+		await fs.writeFile(`${tempDir}/index.html`, '');
+		await expect(pageLoader(someUrl, `${tempDir}/index.html`)).rejects.toThrow('ENOTDIR');
+	});
+
+	test('page without links', async () => {
+		fileOutputPath = await pageLoader(someUrl, tempDir);
+		expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatHtml(simplePage));
 	});
 });
