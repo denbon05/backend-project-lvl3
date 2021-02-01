@@ -54,7 +54,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 	return tasks;
 };
 
-const changeSrc = (data, dirSrcName, host, origin) => {
+const changeSrc = (data, dirSrcName, { host, origin }) => {
 	const $ = cheerio.load(data);
 	const links = [
 		['img', 'src'],
@@ -62,7 +62,12 @@ const changeSrc = (data, dirSrcName, host, origin) => {
 		['link', 'href'],
 	].map(([tag, atrrName]) =>
 		$(tag)
-			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
+			.filter((_i, el) => {
+				const filtred = !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin);
+				logPageLoader('!!$(el).attr(atrrName) => %O', $(!!$(el).attr(atrrName)));
+				logPageLoader('isLocalSrc($(el).attr(atrrName), origin) => %O', $(isLocalSrc($(el).attr(atrrName), origin)));
+				return filtred;
+			})
 			.map((_i, parsedEl) => {
 				const oldAttrValue = $(parsedEl).attr(atrrName);
 				const ext = path.extname(oldAttrValue);
@@ -72,7 +77,8 @@ const changeSrc = (data, dirSrcName, host, origin) => {
 				);
 				const newSrc = path.join(dirSrcName, filename);
 				$(parsedEl).attr(atrrName, newSrc);
-				return `https://${host}${oldAttrValue}`;
+				if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
+				return `${origin}${oldAttrValue}`;
 			})
 			.toArray()
 	);
@@ -98,11 +104,10 @@ export default (uri, outputDir = process.cwd()) => {
 				const filename = makeName(`${url.host}${url.pathname}`, '.html');
 				filePath = path.join(absolutePath, filename);
 				const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
-				const { links, updatedHTML } = changeSrc(data, dirSrcName, url.host, url.origin);
+				const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
 				logPageLoader('local src links on page %O', links);
 				// console.log('links=>', links);
 				const formatedHTML = prettier.format(updatedHTML, { parser: 'html' });
-				logPageLoader('name of dir with local src is %o', dirSrcName);
 				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
 				return { links, pathToDirSrcFiles };
 			},
@@ -112,6 +117,7 @@ export default (uri, outputDir = process.cwd()) => {
 			({ links, pathToDirSrcFiles }) => {
 				if (links.length > 0) {
 					fsPromises.mkdir(pathToDirSrcFiles);
+					logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
 					return downloadSrc(links, pathToDirSrcFiles);
 				}
 				return null;

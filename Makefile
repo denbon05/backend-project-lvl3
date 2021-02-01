@@ -1,8 +1,5 @@
 install: install-deps
 
-start:
-	node bin/page-loader.js https://ru.hexlet.io/courses
-
 install-deps:
 	npm ci
 
