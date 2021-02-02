@@ -11,57 +11,57 @@ import axiosDebug from 'axios-debug-log';
 import Listr from 'listr';
 
 axiosDebug({
-	request: (logAxios, config) => {
-		logAxios(`Request with ${config.headers['content-type']}`);
-	},
-	response: (logAxios, response) => {
-		logAxios(`Response with ${response.headers['content-type']}`, `from ${response.config.url}`);
-	},
-	error: (logAxios, error) => {
-		logAxios('error is', error);
-	},
+  request: (logAxios, config) => {
+    logAxios(`Request with ${config.headers['content-type']}`);
+  },
+  response: (logAxios, response) => {
+    logAxios(`Response with ${response.headers['content-type']}`, `from ${response.config.url}`);
+  },
+  error: (logAxios, error) => {
+    logAxios('error is', error);
+  },
 });
 
 const logPageLoader = debug('page-loader');
 
 export const makeName = (fullname, extension = null) => {
-	const name = fullname.slice(fullname.indexOf('//') + 1);
-	if (extension) return [_.kebabCase(`${name}`), extension].join('');
-	return [_.kebabCase(`${name}`), 'files'].join('_');
+  const name = fullname.slice(fullname.indexOf('//') + 1);
+  if (extension) return [_.kebabCase(`${name}`), extension].join('');
+  return [_.kebabCase(`${name}`), 'files'].join('_');
 };
 
 const isExtExist = (link) => {
-	const ext = path.extname(link);
-	const slashIdx = link.lastIndexOf('/');
-	const dotExtIdx = link.lastIndexOf('.');
-	return dotExtIdx > slashIdx && _.inRange(ext.length, 3, 6);
+  const ext = path.extname(link);
+  const slashIdx = link.lastIndexOf('/');
+  const dotExtIdx = link.lastIndexOf('.');
+  return dotExtIdx > slashIdx && _.inRange(ext.length, 3, 6);
 };
 
 const isLocalSrc = (link, origin) => {
-	const isLocal =
-		(!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
-	logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
-	return isLocal;
+  const isLocal =
+    (!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
+  logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
+  return isLocal;
 };
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
-	const coll = links.map((link) => {
-		logPageLoader('link in downloadSrc %o', link);
-		const filenameWithoutExt = isExtExist(link) ? link.slice(0, link.lastIndexOf('.')) : link;
-		const ext = isExtExist(link) ? path.extname(link) : '.html';
-		const filename = makeName(filenameWithoutExt, ext);
-		logPageLoader('filename in downloadSrc %o', filename);
-		const filepath = path.join(pathToDirSrcFiles, filename);
-		const listrTask = { title: `Download into '${filename}'` };
-		listrTask.task = () =>
-			axios
-				.get(link, { responseType: 'arraybuffer' })
-				.then(({ data }) => fsPromises.writeFile(filepath, data));
-		return listrTask;
-	});
-	if (coll.length === 0) return null;
-	const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
-	return tasks;
+  const coll = links.map((link) => {
+    logPageLoader('link in downloadSrc %o', link);
+    const filenameWithoutExt = isExtExist(link) ? link.slice(0, link.lastIndexOf('.')) : link;
+    const ext = isExtExist(link) ? path.extname(link) : '.html';
+    const filename = makeName(filenameWithoutExt, ext);
+    logPageLoader('filename in downloadSrc %o', filename);
+    const filepath = path.join(pathToDirSrcFiles, filename);
+    const listrTask = { title: `Download into '${filename}'` };
+    listrTask.task = () =>
+      axios
+        .get(link, { responseType: 'arraybuffer' })
+        .then(({ data }) => fsPromises.writeFile(filepath, data));
+    return listrTask;
+  });
+  if (coll.length === 0) return null;
+  const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
+  return tasks;
 };
 
 // prettier-ignore
@@ -91,58 +91,58 @@ const changeSrc = (data, dirSrcName, { host, origin }) => {
 };
 
 export default (uri, outputDir = process.cwd()) => {
-	let filePath;
-	logPageLoader('start downloading page with url %o', uri);
-	return fsPromises
-		.access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
-		.then(
-			() => fsPromises.stat(outputDir),
-			(err) => Promise.reject(err)
-		)
-		.then(
-			(stat) => {
-				if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
-			},
-			(err) => Promise.reject(err)
-		)
-		.then(
-			() => axios.get(uri),
-			(err) => Promise.reject(err)
-		)
-		.then(
-			({ data }) => {
-				logPageLoader('fetched data %O', data);
-				const url = new URL(uri.trim());
-				logPageLoader('parsed url %O', url);
-				const absolutePath = path.resolve(outputDir);
-				const dirSrcName = makeName(`${url.host}${url.pathname}`);
-				const filename = makeName(`${url.host}${url.pathname}`, '.html');
-				filePath = path.join(absolutePath, filename);
-				const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
-				const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
-				logPageLoader(`local src links on ${uri} %O`, links);
-				const formatedHTML = prettier.format(updatedHTML, {
-					parser: 'html',
-					printWidth: 120,
-					tabWidth: 4,
-				});
-				fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
-				return { links, pathToDirSrcFiles };
-			},
-			(err) => Promise.reject(err)
-		)
-		.then(
-			({ links, pathToDirSrcFiles }) => {
-				if (links.length > 0) {
-					fsPromises.mkdir(pathToDirSrcFiles);
-					logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
-					return downloadSrc(links, pathToDirSrcFiles);
-				}
-				return null;
-			},
-			(err) => Promise.reject(err)
-		)
-		.then((tasks) => (tasks ? tasks.run() : null))
-		.then(() => filePath)
-		.catch((err) => Promise.reject(err));
+  let filePath;
+  logPageLoader('start downloading page with url %o', uri);
+  return fsPromises
+    .access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
+    .then(
+      () => fsPromises.stat(outputDir),
+      (err) => Promise.reject(err)
+    )
+    .then(
+      (stat) => {
+        if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
+      },
+      (err) => Promise.reject(err)
+    )
+    .then(
+      () => axios.get(uri),
+      (err) => Promise.reject(err)
+    )
+    .then(
+      ({ data }) => {
+        logPageLoader('fetched data %O', data);
+        const url = new URL(uri.trim());
+        logPageLoader('parsed url %O', url);
+        const absolutePath = path.resolve(outputDir);
+        const dirSrcName = makeName(`${url.host}${url.pathname}`);
+        const filename = makeName(`${url.host}${url.pathname}`, '.html');
+        filePath = path.join(absolutePath, filename);
+        const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
+        const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
+        logPageLoader(`local src links on ${uri} %O`, links);
+        const formatedHTML = prettier.format(updatedHTML, {
+          parser: 'html',
+          printWidth: 120,
+          tabWidth: 4,
+        });
+        fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
+        return { links, pathToDirSrcFiles };
+      },
+      (err) => Promise.reject(err)
+    )
+    .then(
+      ({ links, pathToDirSrcFiles }) => {
+        if (links.length > 0) {
+          fsPromises.mkdir(pathToDirSrcFiles);
+          logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
+          return downloadSrc(links, pathToDirSrcFiles);
+        }
+        return null;
+      },
+      (err) => Promise.reject(err)
+    )
+    .then((tasks) => (tasks ? tasks.run() : null))
+    .then(() => filePath)
+    .catch((err) => Promise.reject(err));
 };
