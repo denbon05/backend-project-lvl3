@@ -6,7 +6,8 @@ import os from 'os';
 import nock from 'nock';
 import prettier from 'prettier';
 import { fileURLToPath } from 'url';
-import pageLoader, { makeName } from '../src/app.js';
+import { makeName } from '../src/utils.js';
+import pageLoader from '../src/app.js';
 
 // @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
