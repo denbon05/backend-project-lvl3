@@ -56,10 +56,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 		listrTask.task = () =>
 			axios
 				.get(link, { responseType: 'arraybuffer' })
-				.then(({ data }) => {
-					logPageLoader('data in DOWNLOADSRC=> %o', data)
-					return fsPromises.writeFile(filepath, data);
-				});
+				.then(({ data }) => fsPromises.writeFile(filepath, data));
 		return listrTask;
 	});
 	if (coll.length === 0) return null;
@@ -68,7 +65,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 };
 
 // prettier-ignore
-const changeSrc = (data, dirSrcName, { host, origin, href }) => {
+const changeSrc = (data, dirSrcName, { host, origin }) => {
 	const $ = cheerio.load(data);
 	const links = [
 		['img', 'src'],
@@ -79,14 +76,13 @@ const changeSrc = (data, dirSrcName, { host, origin, href }) => {
 			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
 			.map((_i, parsedEl) => {
 				const oldAttrValue = $(parsedEl).attr(atrrName);
-				const ext = path.extname(oldAttrValue) || '.html';
-				const filename = ext !== '.html'
+				const ext = path.extname(oldAttrValue);
+				const filename = ext
 						? makeName(`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`, ext)
 						: makeName(`${host}${oldAttrValue}`, '.html');
 				const newSrc = path.join(dirSrcName, filename);
 				logPageLoader(`new ${atrrName} in tag "${tag}" will be %o`, newSrc);
 				$(parsedEl).attr(atrrName, newSrc);
-				if (ext === '.html') return href;
 				if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
 				return `${origin}${oldAttrValue}`;
 			}).toArray()
@@ -146,7 +142,7 @@ export default (uri, outputDir = process.cwd()) => {
 			},
 			(err) => Promise.reject(err)
 		)
-		.then((tasks) => tasks ? tasks.run() : null)
+		.then((tasks) => (tasks ? tasks.run() : null))
 		.then(() => filePath)
 		.catch((err) => Promise.reject(err));
 };
