@@ -16,7 +16,5 @@ export const isExtExist = (link) => {
   return dotExtIdx > slashIdx && _.inRange(ext.length, 3, 6);
 };
 
-export const isLocalSrc = (link, origin) => {
-  const isLocal = (!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
-  return isLocal;
-};
+export const isLocalSrc = (link, origin) => (!_.startsWith(link, '//')
+&& _.startsWith(link, '/')) || _.startsWith(link, origin);
