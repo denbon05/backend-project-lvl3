@@ -38,8 +38,7 @@ const isExtExist = (link) => {
 };
 
 const isLocalSrc = (link, origin) => {
-  const isLocal =
-    (!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
+  const isLocal = (!_.startsWith(link, '//') && _.startsWith(link, '/')) || _.startsWith(link, origin);
   logPageLoader('checking if link lokal %o', `${link} is local - "${isLocal}"`);
   return isLocal;
 };
@@ -53,10 +52,9 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
     logPageLoader('filename in downloadSrc %o', filename);
     const filepath = path.join(pathToDirSrcFiles, filename);
     const listrTask = { title: `Download into '${filename}'` };
-    listrTask.task = () =>
-      axios
-        .get(link, { responseType: 'arraybuffer' })
-        .then(({ data }) => fsPromises.writeFile(filepath, data));
+    listrTask.task = () => axios
+      .get(link, { responseType: 'arraybuffer' })
+      .then(({ data }) => fsPromises.writeFile(filepath, data));
     return listrTask;
   });
   if (coll.length === 0) return null;
@@ -66,28 +64,26 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 
 // prettier-ignore
 const changeSrc = (data, dirSrcName, { host, origin }) => {
-	const $ = cheerio.load(data);
-	const links = [
-		['img', 'src'],
-		['script', 'src'],
-		['link', 'href'],
-	].map(([tag, atrrName]) =>
-		$(tag)
-			.filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
-			.map((_i, parsedEl) => {
-				const oldAttrValue = $(parsedEl).attr(atrrName);
-				const ext = path.extname(oldAttrValue);
-				const filename = ext
-						? makeName(`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`, ext)
-						: makeName(`${host}${oldAttrValue}`, '.html');
-				const newSrc = path.join(dirSrcName, filename);
-				logPageLoader(`new ${atrrName} in tag "${tag}" will be %o`, newSrc);
-				$(parsedEl).attr(atrrName, newSrc);
-				if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
-				return `${origin}${oldAttrValue}`;
-			}).toArray()
-	);
-	return { links: _.flatten(links), updatedHTML: $.html() };
+  const $ = cheerio.load(data);
+  const links = [
+    ['img', 'src'],
+    ['script', 'src'],
+    ['link', 'href'],
+  ].map(([tag, atrrName]) => $(tag)
+    .filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
+    .map((_i, parsedEl) => {
+      const oldAttrValue = $(parsedEl).attr(atrrName);
+      const ext = path.extname(oldAttrValue);
+      const filename = ext
+        ? makeName(`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`, ext)
+        : makeName(`${host}${oldAttrValue}`, '.html');
+      const newSrc = path.join(dirSrcName, filename);
+      logPageLoader(`new ${atrrName} in tag "${tag}" will be %o`, newSrc);
+      $(parsedEl).attr(atrrName, newSrc);
+      if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
+      return `${origin}${oldAttrValue}`;
+    }).toArray());
+  return { links: _.flatten(links), updatedHTML: $.html() };
 };
 
 export default (uri, outputDir = process.cwd()) => {
@@ -97,17 +93,17 @@ export default (uri, outputDir = process.cwd()) => {
     .access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
     .then(
       () => fsPromises.stat(outputDir),
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     )
     .then(
       (stat) => {
         if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
       },
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     )
     .then(
       () => axios.get(uri),
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     )
     .then(
       ({ data }) => {
@@ -129,7 +125,7 @@ export default (uri, outputDir = process.cwd()) => {
         fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
         return { links, pathToDirSrcFiles };
       },
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     )
     .then(
       ({ links, pathToDirSrcFiles }) => {
@@ -140,7 +136,7 @@ export default (uri, outputDir = process.cwd()) => {
         }
         return null;
       },
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     )
     .then((tasks) => (tasks ? tasks.run() : null))
     .then(() => filePath)

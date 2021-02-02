@@ -23,14 +23,12 @@ const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
 const homeFileName = 'en-wikipedia-org-home.html';
 
 const simplePage = '<html><head></head><body><h1>Very simple page</h1></body></html>';
-const formatHtml = (html) =>
-  prettier.format(html, { parser: 'html', printWidth: 120, tabWidth: 4 });
+const formatHtml = (html) => prettier.format(html, { parser: 'html', printWidth: 120, tabWidth: 4 });
 
 let tempDir;
 let fileOutputPath;
 
-const getFixturePath = (filename, dir = '') =>
-  path.join(__dirname, '..', '__fixtures__', dir, filename);
+const getFixturePath = (filename, dir = '') => path.join(__dirname, '..', '__fixtures__', dir, filename);
 const getSrcPath = (filename) => path.join(tempDir, srcFolderName, filename);
 
 nock.disableNetConnect();
