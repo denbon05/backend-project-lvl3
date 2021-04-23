@@ -6,7 +6,6 @@ import os from 'os';
 import nock from 'nock';
 import prettier from 'prettier';
 import { fileURLToPath } from 'url';
-import { makeName } from '../src/utils.js';
 import pageLoader from '../src/app.js';
 
 // @ts-ignore
@@ -34,12 +33,7 @@ const getSrcPath = (filename) => path.join(tempDir, srcFolderName, filename);
 
 nock.disableNetConnect();
 
-test('transform name to kebabCase', () => {
-  expect(makeName('en.wikipedia.org/path', '.html')).toEqual('en-wikipedia-org-path.html');
-  expect(makeName('en.wikipedia.org/home/page')).toEqual('en-wikipedia-org-home-page_files');
-});
-
-beforeEach(async () => {
+beforeAll(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
@@ -112,4 +106,8 @@ describe('check negative cases', () => {
     fileOutputPath = await pageLoader(someUrl, tempDir);
     expect(await fs.readFile(fileOutputPath, 'utf-8')).toEqual(formatHtml(simplePage));
   });
+});
+
+afterAll(() => {
+  fs.rmdir(tempDir, { recursive: true });
 });

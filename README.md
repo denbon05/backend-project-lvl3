@@ -12,9 +12,33 @@
 
 ## Usage
 
-### Debug page-loader
+### Install
 
-<pre>DEBUG=page-loader page-loader https://en.wikipedia.org/wiki/Home_page</pre>
+<pre>
+git clone https://github.com/denbon05/backend-project-lvl3.git
+cd backend-project-lvl3
+make install
+</pre>
+
+### After commands above:
+
+<pre>
+page-loader [options] &lturl>
+
+// Examples:
+
+page-loader https://en.wikipedia.org/wiki/Home_page
+// page downloaded in './en-wikipedia-org-wiki-home-page.html'
+// all page src downloaded in default dir './en-wikipedia-org-wiki-home-page_files'
+</pre>
+
+<dl>
+  <dt>options
+    <dd>-o, --output [dir] <p><small>output dir (default: "./")</small></p></dd>
+  </dt>
+</dl>
+
+### Debug page-loader
 
 [![asciicast](https://asciinema.org/a/387835.svg)](https://asciinema.org/a/387835)
 

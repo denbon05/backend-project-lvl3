@@ -1,7 +1,13 @@
-install: install-deps
+install: install-deps link
 
 install-deps:
 	npm ci
+
+link:
+	npm link
+
+unlink:
+	npm unlink page-loader
 
 test:
 	npm test

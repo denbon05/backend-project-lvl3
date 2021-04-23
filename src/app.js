@@ -39,7 +39,6 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
       .then(({ data }) => fsPromises.writeFile(filepath, data));
     return listrTask;
   });
-  if (coll.length === 0) return null;
   const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
   return tasks;
 };
@@ -73,19 +72,12 @@ export default (uri, outputDir = process.cwd()) => {
   logPageLoader('start downloading page with url %o', uri);
   return fsPromises
     .access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
-    .then(
-      () => fsPromises.stat(outputDir),
-      (err) => Promise.reject(err),
-    )
+    .then(() => fsPromises.stat(outputDir))
     .then(
       (stat) => {
         if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
+        return axios.get(uri);
       },
-      (err) => Promise.reject(err),
-    )
-    .then(
-      () => axios.get(uri),
-      (err) => Promise.reject(err),
     )
     .then(
       ({ data }) => {
@@ -107,20 +99,15 @@ export default (uri, outputDir = process.cwd()) => {
         fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
         return { links, pathToDirSrcFiles };
       },
-      (err) => Promise.reject(err),
     )
     .then(
       ({ links, pathToDirSrcFiles }) => {
-        if (links.length > 0) {
-          fsPromises.mkdir(pathToDirSrcFiles);
-          logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
-          return downloadSrc(links, pathToDirSrcFiles);
-        }
-        return null;
+        fsPromises.mkdir(pathToDirSrcFiles);
+        logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
+        return downloadSrc(links, pathToDirSrcFiles);
       },
-      (err) => Promise.reject(err),
     )
-    .then((tasks) => (tasks ? tasks.run() : null))
+    .then((tasks) => tasks.run())
     .then(() => filePath)
     .catch((err) => Promise.reject(err));
 };
