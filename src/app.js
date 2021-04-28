@@ -39,31 +39,30 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
       .then(({ data }) => fsPromises.writeFile(filepath, data));
     return listrTask;
   });
-  const tasks = new Listr(coll, { concurrent: true, exitOnError: false });
-  return tasks;
+  const tasks = new Listr(coll, { concurrent: true });
+  return Promise.resolve(tasks);
 };
 
 // prettier-ignore
 const changeSrc = (data, dirSrcName, { host, origin }) => {
   const $ = cheerio.load(data);
-  const links = [
-    ['img', 'src'],
-    ['script', 'src'],
-    ['link', 'href'],
-  ].map(([tag, atrrName]) => $(tag)
-    .filter((_i, el) => !!$(el).attr(atrrName) && isLocalSrc($(el).attr(atrrName), origin))
-    .map((_i, parsedEl) => {
-      const oldAttrValue = $(parsedEl).attr(atrrName);
-      const ext = path.extname(oldAttrValue);
+  const tagsWithSrc = [{ img: 'src' }, { script: 'src' }, { link: 'href' }];
+  const links = tagsWithSrc.map((tagData) => {
+    const [[tag, attr]] = Object.entries(tagData);
+    const tagsWithLocalSrc = $(tag)
+      .filter((_i, el) => !!$(el).attr(attr) && isLocalSrc($(el).attr(attr), origin));
+    return tagsWithLocalSrc.map((_i, el) => {
+      const oldAttrValue = $(el).attr(attr);
+      const { ext, name, dir } = path.parse(oldAttrValue);
       const filename = ext
-        ? makeName(`${host}${oldAttrValue.slice(0, oldAttrValue.lastIndexOf('.'))}`, ext)
-        : makeName(`${host}${oldAttrValue}`, '.html');
+        ? makeName(`${host}-${dir}-${name}`, ext)
+        : makeName(`${host}-${dir}-${name}`, '.html');
       const newSrc = path.join(dirSrcName, filename);
-      logPageLoader(`new ${atrrName} in tag "${tag}" will be %o`, newSrc);
-      $(parsedEl).attr(atrrName, newSrc);
-      if (_.startsWith(oldAttrValue, origin)) return oldAttrValue;
-      return `${origin}${oldAttrValue}`;
-    }).toArray());
+      $(el).attr(attr, newSrc);
+      logPageLoader('filename %O', filename);
+      return _.startsWith(oldAttrValue, origin) ? oldAttrValue : `${origin}${oldAttrValue}`;
+    }).toArray();
+  });
   return { links: _.flatten(links), updatedHTML: $.html() };
 };
 
@@ -71,43 +70,34 @@ export default (uri, outputDir = process.cwd()) => {
   let filePath;
   logPageLoader('start downloading page with url %o', uri);
   return fsPromises
-    .access(outputDir, fs.constants.F_OK || fs.constants.W_OK)
+    .access(outputDir, fs.constants.W_OK)
     .then(() => fsPromises.stat(outputDir))
-    .then(
-      (stat) => {
-        if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
-        return axios.get(uri);
-      },
-    )
-    .then(
-      ({ data }) => {
-        logPageLoader('fetched data %O', data);
-        const url = new URL(uri.trim());
-        logPageLoader('parsed url %O', url);
-        const absolutePath = path.resolve(outputDir);
-        const dirSrcName = makeName(`${url.host}${url.pathname}`);
-        const filename = makeName(`${url.host}${url.pathname}`, '.html');
-        filePath = path.join(absolutePath, filename);
-        const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
-        const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
-        logPageLoader(`local src links on ${uri} %O`, links);
-        const formatedHTML = prettier.format(updatedHTML, {
-          parser: 'html',
-          printWidth: 120,
-          tabWidth: 4,
-        });
-        fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
-        return { links, pathToDirSrcFiles };
-      },
-    )
-    .then(
-      ({ links, pathToDirSrcFiles }) => {
-        fsPromises.mkdir(pathToDirSrcFiles);
-        logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
-        return downloadSrc(links, pathToDirSrcFiles);
-      },
-    )
+    .then((stat) => {
+      if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
+      return axios.get(uri);
+    })
+    .then(({ data }) => {
+      logPageLoader('fetched data %O', data);
+      const url = new URL(uri.trim());
+      logPageLoader('parsed url %O', url);
+      const absolutePath = path.resolve(outputDir);
+      const dirSrcName = makeName(`${url.host}${url.pathname}`);
+      const filename = makeName(`${url.host}${url.pathname}`, '.html');
+      filePath = path.join(absolutePath, filename);
+      const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
+      const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
+      logPageLoader(`local src links on ${uri} %O`, links);
+      const formatedHTML = prettier.format(updatedHTML, {
+        parser: 'html',
+        printWidth: 120,
+        tabWidth: 4,
+      });
+      fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
+      fsPromises.mkdir(pathToDirSrcFiles);
+      logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
+      return Promise.resolve({ links, pathToDirSrcFiles });
+    })
+    .then(({ links, pathToDirSrcFiles }) => downloadSrc(links, pathToDirSrcFiles))
     .then((tasks) => tasks.run())
-    .then(() => filePath)
-    .catch((err) => Promise.reject(err));
+    .then(() => filePath);
 };

@@ -85,7 +85,7 @@ test('wrong url', async () => {
 });
 
 describe('check negative cases', () => {
-  beforeAll(() => nock(wikiUrl).get('/simplePage').reply(200, simplePage));
+  beforeEach(() => nock(wikiUrl).get('/simplePage').reply(200, simplePage));
   const someUrl = `${wikiUrl}/simplePage`;
 
   test('save page to not existing dir', async () => {
