@@ -9,7 +9,7 @@ import prettier from 'prettier';
 import debug from 'debug';
 import axiosDebug from 'axios-debug-log';
 import Listr from 'listr';
-import { isLocalSrc, makeName, isExtExist } from './utils.js';
+import { isLocalSrc, makeName } from './utils.js';
 
 axiosDebug({
   request: (logAxios, config) => {
