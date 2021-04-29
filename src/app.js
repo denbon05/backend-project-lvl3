@@ -40,7 +40,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 };
 
 // prettier-ignore
-const changeSrc = (data, dirSrcName, { host, origin }) => {
+const changeSrc = (data, dirSrcName, { host, origin, pathname }) => {
   const $ = cheerio.load(data);
   const tagsWithSrc = [
     { tag: 'img', attr: 'src' },
@@ -53,11 +53,11 @@ const changeSrc = (data, dirSrcName, { host, origin }) => {
     return tagsWithLocalSrc.map((_i, el) => {
       const oldAttrValue = $(el).attr(attr);
       logPageLoader('oldAttrValue %O', oldAttrValue);
-      const filename = makeName(oldAttrValue, 'file', host);
+      const filename = makeName(`${pathname}-${oldAttrValue}`, 'file', host);
       const newSrc = path.join(dirSrcName, filename);
       logPageLoader('newSrc %O', newSrc);
       $(el).attr(attr, newSrc);
-      const link = oldAttrValue.match(/^http/) ? oldAttrValue : `${origin}${oldAttrValue}`;
+      const link = oldAttrValue.match(/^http/) ? oldAttrValue : `${origin}${pathname}${oldAttrValue}`;
       return { link, filename };
     }).toArray();
   });
@@ -79,7 +79,7 @@ export default (uri, outputDir = process.cwd()) => {
       const url = new URL(uri.trim());
       logPageLoader('parsed url %O', url);
       const absolutePath = path.resolve(outputDir);
-      const dirSrcName = makeName(`${url.host}`, 'srcDir');
+      const dirSrcName = makeName(`${url.host}${url.pathname}`, 'srcDir');
       const filename = makeName(`${url.host}${url.pathname}.html`, 'file');
       filePath = path.join(absolutePath, filename);
       const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);

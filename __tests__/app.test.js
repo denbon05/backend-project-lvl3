@@ -12,15 +12,15 @@ import pageLoader from '../src/app.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const wikiUrl = 'https://en.wikipedia.org';
+const wikiUrl = 'https://en.wikipedia.org/about';
 
 const wikiFileName = 'wiki.html';
-const changedHtmlFileName = 'en-wikipedia-org.html';
-const srcFolderName = 'en-wikipedia-org_files';
-const wikiLogoPngName = 'en-wikipedia-org-static-apple-touch-wikipedia.png';
-const fileJsName = 'en-wikipedia-org-some.js';
-const phpFileName = 'en-wikipedia-org-w-opensearch-desc.php';
-const homeFileName = 'en-wikipedia-org-home.html';
+const changedHtmlFileName = 'en-wikipedia-org-about.html';
+const srcFolderName = 'en-wikipedia-org-about_files';
+const wikiLogoPngName = 'en-wikipedia-org-about-static-apple-touch-wikipedia.png';
+const fileJsName = 'en-wikipedia-org-about-some.js';
+const phpFileName = 'en-wikipedia-org-about-w-opensearch-desc.php';
+const homeFileName = 'en-wikipedia-org-about-home.html';
 
 const simplePage = '<html><head></head><body><h1>Very simple page</h1></body></html>';
 const formatHtml = (html) => prettier.format(html, { parser: 'html', printWidth: 120, tabWidth: 4 });
@@ -42,16 +42,17 @@ test('download page and src', async () => {
   const expectedLogoPng = await fs.readFile(getFixturePath(wikiLogoPngName, srcFolderName));
   const expectedPhpData = await fs.readFile(getFixturePath(phpFileName, srcFolderName), 'utf-8');
   const expectedJsData = await fs.readFile(getFixturePath(fileJsName, srcFolderName), 'utf-8');
-  nock(wikiUrl)
-    .get('/')
+  const url = new URL(wikiUrl);
+  nock(url.origin)
+    .get(url.pathname)
     .reply(200, rawHtml)
-    .get('/static/apple-touch/wikipedia.png')
+    .get(`${url.pathname}/static/apple-touch/wikipedia.png`)
     .reply(200, expectedLogoPng)
-    .get('/w/opensearch_desc.php')
+    .get(`${url.pathname}/w/opensearch_desc.php`)
     .reply(200, expectedPhpData)
-    .get('/some.js')
+    .get(`${url.pathname}/some.js`)
     .reply(200, expectedJsData)
-    .get('/home')
+    .get(`${url.pathname}/home`)
     .reply(200, rawHtml);
   fileOutputPath = await pageLoader(wikiUrl, tempDir);
 
