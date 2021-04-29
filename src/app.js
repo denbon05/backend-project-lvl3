@@ -26,17 +26,13 @@ axiosDebug({
 const logPageLoader = debug('page-loader');
 
 const downloadSrc = (links, pathToDirSrcFiles) => {
-  const coll = links.map((link) => {
+  const coll = links.map(({ link, filename }) => {
     logPageLoader('link in downloadSrc %o', link);
-    const filenameWithoutExt = isExtExist(link) ? link.slice(0, link.lastIndexOf('.')) : link;
-    const ext = isExtExist(link) ? path.extname(link) : '.html';
-    const filename = makeName(filenameWithoutExt, ext);
     logPageLoader('filename in downloadSrc %o', filename);
-    const filepath = path.join(pathToDirSrcFiles, filename);
     const listrTask = { title: `Download into '${filename}'` };
     listrTask.task = () => axios
       .get(link, { responseType: 'arraybuffer' })
-      .then(({ data }) => fsPromises.writeFile(filepath, data));
+      .then(({ data }) => fsPromises.writeFile(path.join(pathToDirSrcFiles, filename), data));
     return listrTask;
   });
   const tasks = new Listr(coll, { concurrent: true });
@@ -46,21 +42,23 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 // prettier-ignore
 const changeSrc = (data, dirSrcName, { host, origin }) => {
   const $ = cheerio.load(data);
-  const tagsWithSrc = [{ img: 'src' }, { script: 'src' }, { link: 'href' }];
-  const links = tagsWithSrc.map((tagData) => {
-    const [[tag, attr]] = Object.entries(tagData);
+  const tagsWithSrc = [
+    { tag: 'img', attr: 'src' },
+    { tag: 'script', attr: 'src' },
+    { tag: 'link', attr: 'href' },
+  ];
+  const links = tagsWithSrc.map(({ tag, attr }) => {
     const tagsWithLocalSrc = $(tag)
       .filter((_i, el) => !!$(el).attr(attr) && isLocalSrc($(el).attr(attr), origin));
     return tagsWithLocalSrc.map((_i, el) => {
       const oldAttrValue = $(el).attr(attr);
-      const { ext, name, dir } = path.parse(oldAttrValue);
-      const filename = ext
-        ? makeName(`${host}-${dir}-${name}`, ext)
-        : makeName(`${host}-${dir}-${name}`, '.html');
+      logPageLoader('oldAttrValue %O', oldAttrValue);
+      const filename = makeName(oldAttrValue, 'file', host);
       const newSrc = path.join(dirSrcName, filename);
+      logPageLoader('newSrc %O', newSrc);
       $(el).attr(attr, newSrc);
-      logPageLoader('filename %O', filename);
-      return _.startsWith(oldAttrValue, origin) ? oldAttrValue : `${origin}${oldAttrValue}`;
+      const link = oldAttrValue.match(/^http/) ? oldAttrValue : `${origin}${oldAttrValue}`;
+      return { link, filename };
     }).toArray();
   });
   return { links: _.flatten(links), updatedHTML: $.html() };
@@ -81,19 +79,20 @@ export default (uri, outputDir = process.cwd()) => {
       const url = new URL(uri.trim());
       logPageLoader('parsed url %O', url);
       const absolutePath = path.resolve(outputDir);
-      const dirSrcName = makeName(`${url.host}${url.pathname}`);
-      const filename = makeName(`${url.host}${url.pathname}`, '.html');
+      const dirSrcName = makeName(`${url.host}`, 'srcDir');
+      const filename = makeName(`${url.host}${url.pathname}.html`, 'file');
       filePath = path.join(absolutePath, filename);
       const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
       const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
       logPageLoader(`local src links on ${uri} %O`, links);
+      logPageLoader('updatedHTML %O', updatedHTML);
       const formatedHTML = prettier.format(updatedHTML, {
         parser: 'html',
         printWidth: 120,
         tabWidth: 4,
       });
       fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
-      fsPromises.mkdir(pathToDirSrcFiles);
+      if (links.length > 0) fsPromises.mkdir(pathToDirSrcFiles);
       logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
       return Promise.resolve({ links, pathToDirSrcFiles });
     })
