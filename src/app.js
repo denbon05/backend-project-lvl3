@@ -52,11 +52,9 @@ const changeSrc = (data, dirSrcName, { href, origin, pathname }) => {
       .filter((_i, el) => !!$(el).attr(attr) && isLocalSrc($(el).attr(attr), href));
     return tagsWithLocalSrc.map((_i, el) => {
       const oldAttrValue = $(el).attr(attr);
-      const normalizedPathname = pathname === '/' || oldAttrValue.includes(pathname.slice(1))
-        ? '' : pathname;
       logPageLoader('oldAttrValue %O', oldAttrValue);
       const link = oldAttrValue.match(href) ? new URL(oldAttrValue)
-        : new URL(`${normalizedPathname}${oldAttrValue}`, origin);
+        : new URL(oldAttrValue, origin);
       logPageLoader('link %O', link);
       const filename = makeFileName(link);
       const newSrc = path.join(dirSrcName, filename);
