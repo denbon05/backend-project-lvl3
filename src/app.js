@@ -50,7 +50,7 @@ const changeSrc = (data, dirSrcName, { href, origin, pathname }) => {
   ];
   const links = tagsWithSrc.map(({ tag, attr }) => {
     const tagsWithLocalSrc = $(tag)
-      .filter((_i, el) => !!$(el).attr(attr) && isLocalSrc($(el).attr(attr), origin));
+      .filter((_i, el) => !!$(el).attr(attr) && isLocalSrc($(el).attr(attr), href));
     return tagsWithLocalSrc.map((_i, el) => {
       const oldAttrValue = $(el).attr(attr);
       logPageLoader('oldAttrValue %O', oldAttrValue);
