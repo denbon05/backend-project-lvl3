@@ -11,5 +11,5 @@ export const makeFileName = ({ host, pathname }) => {
   return [_.kebabCase(`${host}-${dir}-${name}`), ext].join('');
 };
 
-export const isLocalSrc = (link, href) => (!_.startsWith(link, '//')
-  && _.startsWith(link, '/')) || _.startsWith(link, href);
+export const isLocalSrc = (link, origin) => (!_.startsWith(link, '//')
+  && _.startsWith(link, '/')) || _.startsWith(link, origin);
