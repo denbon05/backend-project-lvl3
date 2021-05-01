@@ -40,7 +40,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 };
 
 // prettier-ignore
-const changeSrc = (data, dirSrcName, { href, origin, pathname }) => {
+const changeSrc = (data, dirSrcName, { href, origin }) => {
   const $ = cheerio.load(data);
   const tagsWithSrc = [
     { tag: 'img', attr: 'src' },
