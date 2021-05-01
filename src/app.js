@@ -42,6 +42,7 @@ const downloadSrc = (links, pathToDirSrcFiles) => {
 // prettier-ignore
 const changeSrc = (data, dirSrcName, { href, origin, pathname }) => {
   const $ = cheerio.load(data);
+  const normalizedPathname = pathname === '/' ? '' : pathname;
   const tagsWithSrc = [
     { tag: 'img', attr: 'src' },
     { tag: 'script', attr: 'src' },
@@ -53,7 +54,9 @@ const changeSrc = (data, dirSrcName, { href, origin, pathname }) => {
     return tagsWithLocalSrc.map((_i, el) => {
       const oldAttrValue = $(el).attr(attr);
       logPageLoader('oldAttrValue %O', oldAttrValue);
-      const link = oldAttrValue.match(href) ? new URL($(el).attr(attr)) : new URL(`${pathname}${$(el).attr(attr)}`, origin);
+      const link = oldAttrValue.match(href) ? new URL(oldAttrValue)
+        : new URL(`${normalizedPathname}${oldAttrValue}`, origin);
+      logPageLoader('link %O', link);
       const filename = makeFileName(link);
       const newSrc = path.join(dirSrcName, filename);
       logPageLoader('newSrc %O', newSrc);
