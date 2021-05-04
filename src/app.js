@@ -68,42 +68,44 @@ const changeSrc = (data, dirSrcName, { href, origin }) => {
 
 export default (uri, outputDir = process.cwd()) => {
   let filePath;
+  let data;
+  let links;
+  let pathToDirSrcFiles;
+
+  const absolutePath = path.resolve(outputDir);
+
   logPageLoader('start downloading page with url %o', uri);
   return axios.get(uri)
-    .then(({ data }) => {
-      const access = fsPromises.access(outputDir, fs.constants.W_OK);
-      return Promise.all([access, data]);
+    .then(({ data: pageData }) => {
+      data = pageData;
+      return fsPromises.access(absolutePath, fs.constants.W_OK);
     })
-    .then(([, data]) => {
-      const stat = fsPromises.stat(outputDir);
-      return Promise.all([stat, data]);
-    })
-    .then(([stat, data]) => {
+    .then(() => fsPromises.stat(outputDir))
+    .then((stat) => {
       if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
-      logPageLoader('fetched data %O', data);
       const url = new URL(uri.trim());
+      logPageLoader('fetched data %O', data);
       logPageLoader('parsed url %O', url);
-      const absolutePath = path.resolve(outputDir);
       const dirSrcName = makeSrcDirName(`${url.host}${url.pathname}`);
+      pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
       const filename = makeFileName(url);
       filePath = path.join(absolutePath, filename);
-      const pathToDirSrcFiles = path.join(absolutePath, dirSrcName);
-      const { links, updatedHTML } = changeSrc(data, dirSrcName, url);
+      const srcData = changeSrc(data, dirSrcName, url);
+      links = srcData.links;
       logPageLoader(`local src links on ${uri} %O`, links);
-      logPageLoader('updatedHTML %O', updatedHTML);
-      const formatedHTML = prettier.format(updatedHTML, {
+      logPageLoader('updatedHTML %O', srcData.updatedHTML);
+      const formatedHTML = prettier.format(srcData.updatedHTML, {
         parser: 'html',
         printWidth: 120,
         tabWidth: 4,
       });
-      fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
       logPageLoader('path to dir with src is %o', pathToDirSrcFiles);
-      return Promise.resolve({ links, pathToDirSrcFiles });
+      return fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
     })
-    .then(({ links, pathToDirSrcFiles }) => {
+    .then(() => {
       if (links.length > 0) fsPromises.mkdir(pathToDirSrcFiles);
-      return downloadSrc(links, pathToDirSrcFiles);
     })
+    .then(() => downloadSrc(links, pathToDirSrcFiles))
     .then((tasks) => tasks.run())
     .then(() => filePath);
 };
