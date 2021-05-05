@@ -68,7 +68,6 @@ const changeSrc = (data, dirSrcName, { href, origin }) => {
 
 export default (uri, outputDir = process.cwd()) => {
   let filePath;
-  let data;
   let links;
   let pathToDirSrcFiles;
 
@@ -76,13 +75,7 @@ export default (uri, outputDir = process.cwd()) => {
 
   logPageLoader('start downloading page with url %o', uri);
   return axios.get(uri)
-    .then(({ data: pageData }) => {
-      data = pageData;
-      return fsPromises.access(absolutePath, fs.constants.W_OK);
-    })
-    .then(() => fsPromises.stat(outputDir))
-    .then((stat) => {
-      if (!stat.isDirectory()) throw Error(`ENOTDIR: not a directory, open ${outputDir}`);
+    .then(({ data }) => {
       const url = new URL(uri.trim());
       logPageLoader('fetched data %O', data);
       logPageLoader('parsed url %O', url);
@@ -103,7 +96,9 @@ export default (uri, outputDir = process.cwd()) => {
       return fsPromises.writeFile(filePath, formatedHTML, 'utf-8');
     })
     .then(() => {
-      if (links.length > 0) fsPromises.mkdir(pathToDirSrcFiles);
+      if (links.length > 0 && !fs.existsSync(pathToDirSrcFiles)) {
+        fsPromises.mkdir(pathToDirSrcFiles);
+      }
     })
     .then(() => downloadSrc(links, pathToDirSrcFiles))
     .then((tasks) => tasks.run())
