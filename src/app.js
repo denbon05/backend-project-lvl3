@@ -97,9 +97,9 @@ export default (uri, outputDir = process.cwd()) => {
     })
     .then(() => {
       if (links.length > 0 && !fs.existsSync(pathToDirSrcFiles)) {
-        fsPromises.mkdir(pathToDirSrcFiles);
+        return fsPromises.mkdir(pathToDirSrcFiles);
       }
-      return false;
+      return null;
     })
     .then(() => downloadSrc(links, pathToDirSrcFiles))
     .then((tasks) => tasks.run())
